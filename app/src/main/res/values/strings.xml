@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Brasero</string>
+
+    <string name="forecast_today_title">Today</string>
+    <string name="forecast_temperature_celsius">%d ºC</string>
+    <string name="forecast_week_title">This week</string>
 </resources>
