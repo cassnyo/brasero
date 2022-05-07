@@ -1,42 +1,28 @@
 package com.cassnyo.brasero.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 
-private val DarkColorPalette = darkColors(
-    primary = Purple200,
-    primaryVariant = Purple700,
-    secondary = Teal200
-)
-
 private val LightColorPalette = lightColors(
-    primary = Purple500,
-    primaryVariant = Purple700,
-    secondary = Teal200
-
-    /* Other default colors to override
-    background = Color.White,
-    surface = Color.White,
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
-    */
+    primary = ColorPrimary,
+    primaryVariant = ColorPrimaryVariant,
+    secondary = ColorSecondary,
+    secondaryVariant = ColorSecondaryVariant,
+    background = ColorBackground,
+    surface = ColorSurface,
+    error = ColorError,
+    onPrimary = ColorOnPrimary,
+    onSecondary = ColorOnSecondary,
+    onBackground = ColorOnBackground,
+    onSurface = ColorOnSurface,
+    onError = ColorOnError
 )
 
 @Composable
-fun BraseroTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = if (darkTheme) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
-    }
-
+fun BraseroTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colors = colors,
+        colors = LightColorPalette,
         typography = Typography,
         shapes = Shapes,
         content = content

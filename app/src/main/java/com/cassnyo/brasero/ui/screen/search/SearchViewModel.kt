@@ -59,6 +59,14 @@ class SearchViewModel @Inject constructor(
         currentQuery.value = query
     }
 
+    fun onClearQueryClicked() {
+        currentQuery.value = ""
+    }
+
+    fun onBackClicked() {
+        // TODO
+    }
+
     fun onCityClicked(city: City) {
         // TODO
     }
