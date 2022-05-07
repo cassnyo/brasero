@@ -1,6 +1,7 @@
 package com.cassnyo.brasero.data.network
 
 import com.cassnyo.brasero.data.network.response.common.AemetSuccessApi
+import com.cassnyo.brasero.data.network.response.common.CityApi
 import com.cassnyo.brasero.data.network.response.common.ForecastApi
 import com.cassnyo.brasero.data.network.response.daily.DailyForecastItemDayApi
 import com.cassnyo.brasero.data.network.response.hourly.HourlyForecastItemDayApi
@@ -9,6 +10,9 @@ import retrofit2.http.Path
 import retrofit2.http.Url
 
 interface AemetApi {
+
+    @GET("maestro/municipios")
+    suspend fun getCities(): List<CityApi>
 
     @GET("prediccion/especifica/municipio/diaria/{townId}")
     suspend fun getDailyForecastByTownWrapper(@Path("townId") townId: String): AemetSuccessApi
