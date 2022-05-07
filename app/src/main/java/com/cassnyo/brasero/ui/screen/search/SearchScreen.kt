@@ -39,11 +39,12 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.cassnyo.brasero.R
 import com.cassnyo.brasero.ui.model.City
 
 @Composable
-fun SearchScreen() {
+fun SearchScreen(navController: NavController) {
     val viewModel: SearchViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState(initial = null)
 
@@ -53,7 +54,7 @@ fun SearchScreen() {
     val cities = state?.cities.orEmpty()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        IconButton(onClick = { /*TODO*/ }) {
+        IconButton(onClick = { navController.navigateUp() }) {
             Icon(
                 imageVector = Icons.Rounded.KeyboardArrowLeft,
                 contentDescription = "Volver atrás",

@@ -12,8 +12,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -23,22 +27,31 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.cassnyo.brasero.R
 import com.cassnyo.brasero.data.database.entity.DayForecast
 import com.cassnyo.brasero.data.database.entity.HourForecast
 import com.cassnyo.brasero.data.database.entity.Town
+import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
-fun ForecastScreen() {
+fun ForecastScreen(navController: NavController) {
     val viewModel: ForecastViewModel = hiltViewModel()
 
     val forecast = viewModel.forecast.collectAsState(initial = null).value
 
     if (forecast != null) {
         Column(Modifier.fillMaxSize()) {
+            // FIXME Temporary
+            IconButton(onClick = { navController.navigate(NavigationRoutes.SEARCH) }) {
+                Icon(
+                    imageVector = Icons.Rounded.Search,
+                    contentDescription = "Buscar municipio"
+                )
+            }
             Header(
                 town = forecast.town,
                 selectedHourForecast = forecast.hours.first()
