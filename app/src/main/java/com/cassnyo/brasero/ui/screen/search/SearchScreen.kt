@@ -46,12 +46,7 @@ import com.cassnyo.brasero.ui.model.City
 @Composable
 fun SearchScreen(navController: NavController) {
     val viewModel: SearchViewModel = hiltViewModel()
-    val state by viewModel.state.collectAsState(initial = null)
-
-
-    val query = state?.query.orEmpty()
-    val isLoading = state?.isLoading ?: false
-    val cities = state?.cities.orEmpty()
+    val state by viewModel.state.collectAsState(initial = SearchViewModel.UiState())
 
     Column(modifier = Modifier.fillMaxSize()) {
         IconButton(onClick = { navController.navigateUp() }) {
@@ -65,7 +60,7 @@ fun SearchScreen(navController: NavController) {
         }
 
         SearchBar(
-            query = query,
+            query = state.query,
             onQueryChanged = viewModel::onQueryChanged,
             onClearQueryClicked = viewModel::onClearQueryClicked
         )
@@ -74,12 +69,12 @@ fun SearchScreen(navController: NavController) {
             modifier = Modifier.fillMaxSize()
         ) {
             when {
-                query.isEmpty() -> SearchPlaceholder()
-                !isLoading && cities.isEmpty() -> NoResultsFound(query)
+                state.query.isEmpty() -> SearchPlaceholder()
+                !state.isLoading && state.cities.isEmpty() -> NoResultsFound(state.query)
             }
 
             CityList(
-                cities = cities,
+                cities = state.cities,
                 onCityClicked = viewModel::onCityClicked,
                 onAddCityClicked = viewModel::onAddCityClicked
             )
