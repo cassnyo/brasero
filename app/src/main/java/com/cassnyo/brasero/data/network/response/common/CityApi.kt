@@ -20,6 +20,6 @@ data class CityApi(
     @Json(name = "destacada") val highlighted: String
 ) {
     fun toCity(): City {
-        return City(this.id, this.name)
+        return City(this.id.removePrefix("id"), this.name)
     }
 }

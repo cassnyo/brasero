@@ -67,10 +67,6 @@ class SearchViewModel @Inject constructor(
         // TODO
     }
 
-    fun onCityClicked(city: City) {
-        // TODO
-    }
-
     fun onAddCityClicked(city: City) {
         // TODO
     }

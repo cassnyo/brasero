@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cassnyo.brasero.R
+import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
 import com.cassnyo.brasero.ui.model.City
 
 @Composable
@@ -75,7 +76,9 @@ fun SearchScreen(navController: NavController) {
 
             CityList(
                 cities = state.cities,
-                onCityClicked = viewModel::onCityClicked,
+                onCityClicked = { city ->
+                    navController.navigate(NavigationRoutes.forecast(city.id))
+                },
                 onAddCityClicked = viewModel::onAddCityClicked
             )
         }

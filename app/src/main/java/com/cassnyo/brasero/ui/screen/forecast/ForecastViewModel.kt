@@ -1,5 +1,6 @@
 package com.cassnyo.brasero.ui.screen.forecast
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cassnyo.brasero.data.database.join.ForecastDetail
@@ -13,10 +14,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ForecastViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val forecastRepository: ForecastRepository
 ): ViewModel() {
 
-    val forecast: Flow<ForecastDetail?> = forecastRepository.getForecastDetailByTown("28051").flowOn(Dispatchers.IO)
+    val townId = savedStateHandle.get<String>("cityId").orEmpty()
+    val forecast: Flow<ForecastDetail?> = forecastRepository.getForecastDetailByTown(townId).flowOn(Dispatchers.IO)
 
     init {
         refreshForecast()
@@ -24,7 +27,7 @@ class ForecastViewModel @Inject constructor(
 
     private fun refreshForecast() {
         viewModelScope.launch(Dispatchers.IO) {
-            forecastRepository.refreshForecastByTown("28051")
+            forecastRepository.refreshForecastByTown(townId)
         }
     }
 

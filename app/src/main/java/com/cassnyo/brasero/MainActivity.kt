@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavHost(
                         navController = navController,
-                        startDestination = NavigationRoutes.FORECAST
+                        startDestination = NavigationRoutes.SEARCH
                     ) {
                         composable(route = NavigationRoutes.FORECAST) {
                             ForecastScreen(navController)
