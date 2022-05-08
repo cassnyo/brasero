@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
@@ -38,7 +38,7 @@ class SearchViewModel @Inject constructor(
         }
         .flatMapLatest { query ->
             when {
-                query.isEmpty() -> emptyFlow()
+                query.isEmpty() -> flowOf(emptyList())
                 else -> cityRepository.getCities(query)
             }
         }
