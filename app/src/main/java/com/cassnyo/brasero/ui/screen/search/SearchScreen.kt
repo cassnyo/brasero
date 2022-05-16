@@ -11,10 +11,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
@@ -24,8 +24,9 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.KeyboardArrowLeft
+import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Cancel
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,10 +54,10 @@ fun SearchScreen(navController: NavController) {
     val state by viewModel.state.collectAsState(initial = SearchViewModel.UiState())
 
     Column(modifier = Modifier.fillMaxSize()) {
-        SearchBar(
+        TopBar(
             query = state.query,
-            onQueryChanged = viewModel::onQueryChanged,
             onBackClicked = { navController.navigateUp() },
+            onQueryChanged = viewModel::onQueryChanged,
             onClearQueryClicked = viewModel::onClearQueryClicked
         )
 
@@ -80,10 +81,43 @@ fun SearchScreen(navController: NavController) {
 }
 
 @Composable
-fun SearchBar(
+fun TopBar(
+    query: String,
+    onBackClicked: () -> Unit,
+    onQueryChanged: (String) -> Unit,
+    onClearQueryClicked: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                top = 4.dp,
+                end = 4.dp,
+                bottom = 4.dp
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onBackClicked) {
+            Icon(
+                imageVector = Icons.Rounded.ArrowBack,
+                contentDescription = "Volver atrás"
+            )
+        }
+
+        SearchField(
+            query = query,
+            onQueryChanged = onQueryChanged,
+            onClearQueryClicked = onClearQueryClicked,
+            modifier = Modifier.weight(1f).fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+fun SearchField(
     query: String,
     onQueryChanged: (String) -> Unit,
-    onBackClicked: () -> Unit,
     onClearQueryClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -91,30 +125,23 @@ fun SearchBar(
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChanged,
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .focusRequester(focusRequester),
+        modifier = modifier.focusRequester(focusRequester),
         placeholder = {
             Text(text = "Buscar municipio")
-        },
-        leadingIcon = {
-            IconButton(onClick = onBackClicked) {
-                Icon(
-                    imageVector = Icons.Rounded.KeyboardArrowLeft,
-                    contentDescription = "Volver atrás",
-                    modifier = Modifier.size(36.dp)
-                )
-            }
         },
         trailingIcon = {
             if (query.isNotEmpty()) {
                 IconButton(onClick = onClearQueryClicked) {
                     Icon(
-                        imageVector = Icons.Rounded.Close,
+                        imageVector = Icons.Rounded.Cancel,
                         contentDescription = "Limpiar búsqueda"
                     )
                 }
+            } else {
+                Icon(
+                    imageVector = Icons.Rounded.Search,
+                    contentDescription = "Buscar municipio"
+                )
             }
         },
         keyboardOptions = KeyboardOptions(
@@ -122,7 +149,7 @@ fun SearchBar(
             keyboardType = KeyboardType.Text
         ),
         singleLine = true,
-        shape = RoundedCornerShape(8.dp)
+        shape = CircleShape
     )
     
     LaunchedEffect(Unit) {
