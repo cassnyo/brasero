@@ -15,6 +15,10 @@ class TownRepository @Inject constructor(
     private val braseroDatabase: BraseroDatabase
 ) {
 
+    fun getTowns(): Flow<List<Town>> {
+        return braseroDatabase.townDao().getTowns()
+    }
+
     fun getTownForecast(townId: String): Flow<TownForecast> {
         return braseroDatabase.townForecastDao().getTownForecastById(townId)
     }
@@ -37,8 +41,8 @@ class TownRepository @Inject constructor(
 
         with(braseroDatabase) {
             runInTransaction {
-                townDao().deleteForecast(townId)
-                townDao().saveForecast(forecast)
+                townDao().deleteTown(townId)
+                townDao().saveTown(forecast)
                 dayForecastDao().saveDailyForecast(dailyForecastEntities)
                 hourForecastDao().saveHourlyForecast(hourlyForecastEntities)
             }

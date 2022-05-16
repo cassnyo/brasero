@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
 import com.cassnyo.brasero.ui.screen.forecast.ForecastScreen
+import com.cassnyo.brasero.ui.screen.home.HomeScreen
 import com.cassnyo.brasero.ui.screen.search.SearchScreen
 import com.cassnyo.brasero.ui.theme.BraseroTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -27,8 +28,11 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavHost(
                         navController = navController,
-                        startDestination = NavigationRoutes.SEARCH
+                        startDestination = NavigationRoutes.HOME
                     ) {
+                        composable(route = NavigationRoutes.HOME) {
+                            HomeScreen(navController)
+                        }
                         composable(route = NavigationRoutes.FORECAST) {
                             ForecastScreen(navController)
                         }
