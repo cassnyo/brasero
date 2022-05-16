@@ -5,6 +5,7 @@ import com.cassnyo.brasero.data.network.AemetApi
 import com.cassnyo.brasero.data.network.adapter.LocalDateTimeAdapter
 import com.cassnyo.brasero.data.network.adapter.LocalTimeAdapter
 import com.cassnyo.brasero.data.network.interceptor.ApiKeyInterceptor
+import com.cassnyo.brasero.data.network.interceptor.EncodingMapperInterceptor
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -26,6 +27,7 @@ class NetworkModule {
     fun provideHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .addNetworkInterceptor(ApiKeyInterceptor())
+            .addNetworkInterceptor(EncodingMapperInterceptor())
             .apply {
                 if (BuildConfig.DEBUG) {
                     val loggingInterceptor = HttpLoggingInterceptor().apply {
