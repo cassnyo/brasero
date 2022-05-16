@@ -26,13 +26,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.KeyboardArrowLeft
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -50,19 +53,10 @@ fun SearchScreen(navController: NavController) {
     val state by viewModel.state.collectAsState(initial = SearchViewModel.UiState())
 
     Column(modifier = Modifier.fillMaxSize()) {
-        IconButton(onClick = { navController.navigateUp() }) {
-            Icon(
-                imageVector = Icons.Rounded.KeyboardArrowLeft,
-                contentDescription = "Volver atrás",
-                modifier = Modifier
-                    .padding(4.dp)
-                    .size(36.dp)
-            )
-        }
-
         SearchBar(
             query = state.query,
             onQueryChanged = viewModel::onQueryChanged,
+            onBackClicked = { navController.navigateUp() },
             onClearQueryClicked = viewModel::onClearQueryClicked
         )
 
@@ -89,23 +83,29 @@ fun SearchScreen(navController: NavController) {
 fun SearchBar(
     query: String,
     onQueryChanged: (String) -> Unit,
+    onBackClicked: () -> Unit,
     onClearQueryClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val focusRequester = remember { FocusRequester() }
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChanged,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+            .padding(8.dp)
+            .focusRequester(focusRequester),
         placeholder = {
             Text(text = "Buscar municipio")
         },
         leadingIcon = {
-            Icon(
-                imageVector = Icons.Rounded.Search,
-                contentDescription = "Buscar municipio"
-            )
+            IconButton(onClick = onBackClicked) {
+                Icon(
+                    imageVector = Icons.Rounded.KeyboardArrowLeft,
+                    contentDescription = "Volver atrás",
+                    modifier = Modifier.size(36.dp)
+                )
+            }
         },
         trailingIcon = {
             if (query.isNotEmpty()) {
@@ -124,6 +124,11 @@ fun SearchBar(
         singleLine = true,
         shape = RoundedCornerShape(8.dp)
     )
+    
+    LaunchedEffect(Unit) {
+        // Request focus to open the keyboard
+        focusRequester.requestFocus()
+    }
 }
 
 @Composable
