@@ -6,8 +6,8 @@ import androidx.room.TypeConverters
 import com.cassnyo.brasero.data.database.converter.LocalDateConverter
 import com.cassnyo.brasero.data.database.converter.LocalDateTimeConverter
 import com.cassnyo.brasero.data.database.dao.DayForecastDao
-import com.cassnyo.brasero.data.database.dao.ForecastDao
-import com.cassnyo.brasero.data.database.dao.ForecastDetailDao
+import com.cassnyo.brasero.data.database.dao.TownDao
+import com.cassnyo.brasero.data.database.dao.TownForecastDao
 import com.cassnyo.brasero.data.database.dao.HourForecastDao
 import com.cassnyo.brasero.data.database.entity.DayForecast
 import com.cassnyo.brasero.data.database.entity.Town
@@ -27,9 +27,9 @@ import com.cassnyo.brasero.data.database.entity.HourForecast
 )
 abstract class BraseroDatabase: RoomDatabase() {
 
-    abstract fun forecastDao(): ForecastDao
-    abstract fun hourForecast(): HourForecastDao
-    abstract fun dayForecast(): DayForecastDao
-    abstract fun forecastDetailDao(): ForecastDetailDao
+    abstract fun townDao(): TownDao
+    abstract fun hourForecastDao(): HourForecastDao
+    abstract fun dayForecastDao(): DayForecastDao
+    abstract fun townForecastDao(): TownForecastDao
 
 }

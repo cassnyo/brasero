@@ -1,8 +1,8 @@
 package com.cassnyo.brasero.ui.common.navigation
 
 object NavigationRoutes {
-    const val FORECAST = "forecast/{cityId}"
-    fun forecast(cityId: String) = FORECAST.replace("{cityId}", cityId)
+    const val FORECAST = "forecast/{townId}"
+    fun forecast(townId: String) = FORECAST.replace("{townId}", townId)
 
     const val SEARCH = "search"
 }

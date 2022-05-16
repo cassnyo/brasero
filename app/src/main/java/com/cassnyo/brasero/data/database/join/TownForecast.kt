@@ -6,7 +6,7 @@ import com.cassnyo.brasero.data.database.entity.DayForecast
 import com.cassnyo.brasero.data.database.entity.Town
 import com.cassnyo.brasero.data.database.entity.HourForecast
 
-class ForecastDetail(
+class TownForecast(
     @Embedded val town: Town,
     @Relation(
         parentColumn = "id",

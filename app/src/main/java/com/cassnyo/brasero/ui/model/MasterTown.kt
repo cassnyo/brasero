@@ -1,6 +1,6 @@
 package com.cassnyo.brasero.ui.model
 
-data class City(
+data class MasterTown(
     val id: String,
     val name: String
 )

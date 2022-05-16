@@ -2,7 +2,7 @@ package com.cassnyo.brasero.data.repository
 
 import com.cassnyo.brasero.data.database.BraseroDatabase
 import com.cassnyo.brasero.data.database.entity.*
-import com.cassnyo.brasero.data.database.join.ForecastDetail
+import com.cassnyo.brasero.data.database.join.TownForecast
 import com.cassnyo.brasero.data.network.AemetApi
 import com.cassnyo.brasero.data.network.response.common.ForecastApi
 import com.cassnyo.brasero.data.network.response.daily.DailyForecastItemDayApi
@@ -10,16 +10,16 @@ import com.cassnyo.brasero.data.network.response.hourly.HourlyForecastItemDayApi
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class ForecastRepository @Inject constructor(
+class TownRepository @Inject constructor(
     private val aemetApi: AemetApi,
     private val braseroDatabase: BraseroDatabase
 ) {
 
-    fun getForecastDetailByTown(townId: String): Flow<ForecastDetail> {
-        return braseroDatabase.forecastDetailDao().getForecastDetailByTown(townId)
+    fun getTownForecast(townId: String): Flow<TownForecast> {
+        return braseroDatabase.townForecastDao().getTownForecastById(townId)
     }
 
-    suspend fun refreshForecastByTown(townId: String) {
+    suspend fun refreshTownForecast(townId: String) {
         // TODO Observe Room query for a single town
         // TODO refresh daily forecast
         // TODO refresh hourly forecast
@@ -37,10 +37,10 @@ class ForecastRepository @Inject constructor(
 
         with(braseroDatabase) {
             runInTransaction {
-                forecastDao().deleteForecast(townId)
-                forecastDao().saveForecast(forecast)
-                dayForecast().saveDailyForecast(dailyForecastEntities)
-                hourForecast().saveHourlyForecast(hourlyForecastEntities)
+                townDao().deleteForecast(townId)
+                townDao().saveForecast(forecast)
+                dayForecastDao().saveDailyForecast(dailyForecastEntities)
+                hourForecastDao().saveHourlyForecast(hourlyForecastEntities)
             }
         }
     }

@@ -42,7 +42,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cassnyo.brasero.R
 import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
-import com.cassnyo.brasero.ui.model.City
+import com.cassnyo.brasero.ui.model.MasterTown
 
 @Composable
 fun SearchScreen(navController: NavController) {
@@ -71,15 +71,15 @@ fun SearchScreen(navController: NavController) {
         ) {
             when {
                 state.query.isEmpty() -> SearchPlaceholder()
-                !state.isLoading && state.cities.isEmpty() -> NoResultsFound(state.query)
+                !state.isLoading && state.masterTowns.isEmpty() -> NoResultsFound(state.query)
             }
 
-            CityList(
-                cities = state.cities,
-                onCityClicked = { city ->
-                    navController.navigate(NavigationRoutes.forecast(city.id))
+            TownsList(
+                masterTowns = state.masterTowns,
+                onTownClicked = { town ->
+                    navController.navigate(NavigationRoutes.forecast(town.id))
                 },
-                onAddCityClicked = viewModel::onAddCityClicked
+                onAddTownClicked = viewModel::onAddTownClicked
             )
         }
     }
@@ -169,32 +169,33 @@ fun NoResultsFound(
 }
 
 @Composable
-fun CityList(
-    cities: List<City>,
-    onCityClicked: (City) -> Unit,
-    onAddCityClicked: (City) -> Unit,
+fun TownsList(
+    masterTowns: List<MasterTown>,
+    onTownClicked: (MasterTown) -> Unit,
+    onAddTownClicked: (MasterTown) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(8.dp)
+        contentPadding = PaddingValues(8.dp),
+        modifier = modifier
     ) {
         items(
-            items = cities,
-        ) { city ->
+            items = masterTowns,
+        ) { town ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(size = 2.dp))
-                    .clickable { onCityClicked(city) }
+                    .clickable { onTownClicked(town) }
                     .padding(start = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = city.name)
-                IconButton(onClick = { onAddCityClicked(city) }) {
+                Text(text = town.name)
+                IconButton(onClick = { onAddTownClicked(town) }) {
                     Icon(
                         imageVector = Icons.Rounded.Add,
-                        contentDescription = "Añadir ciudad"
+                        contentDescription = "Añadir municipio"
                     )
                 }
             }

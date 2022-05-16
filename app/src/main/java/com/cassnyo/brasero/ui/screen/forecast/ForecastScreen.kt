@@ -41,7 +41,7 @@ import java.util.Locale
 fun ForecastScreen(navController: NavController) {
     val viewModel: ForecastViewModel = hiltViewModel()
 
-    val forecast = viewModel.forecast.collectAsState(initial = null).value
+    val forecast = viewModel.townForecast.collectAsState(initial = null).value
 
     if (forecast != null) {
         Column(Modifier.fillMaxSize()) {

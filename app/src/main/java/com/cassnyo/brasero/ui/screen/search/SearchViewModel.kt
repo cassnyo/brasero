@@ -2,8 +2,8 @@ package com.cassnyo.brasero.ui.screen.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cassnyo.brasero.data.repository.CityRepository
-import com.cassnyo.brasero.ui.model.City
+import com.cassnyo.brasero.data.repository.MasterTownRepository
+import com.cassnyo.brasero.ui.model.MasterTown
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,18 +18,18 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val cityRepository: CityRepository
+    private val masterTownRepository: MasterTownRepository
 ) : ViewModel() {
 
     data class UiState(
         val query: String = "",
         val isLoading: Boolean = false,
-        val cities: List<City> = emptyList()
+        val masterTowns: List<MasterTown> = emptyList()
     )
 
     private val currentQuery = MutableStateFlow("")
     private val isLoading = MutableStateFlow(false)
-    private val cities: Flow<List<City>> = currentQuery
+    private val masterTowns: Flow<List<MasterTown>> = currentQuery
         .debounce(125L)
         .onEach { query ->
             if (query.isNotEmpty()) {
@@ -39,7 +39,7 @@ class SearchViewModel @Inject constructor(
         .flatMapLatest { query ->
             when {
                 query.isEmpty() -> flowOf(emptyList())
-                else -> cityRepository.getCities(query)
+                else -> masterTownRepository.getMasterTowns(query)
             }
         }
         .onEach {
@@ -50,7 +50,7 @@ class SearchViewModel @Inject constructor(
     val state: Flow<UiState> = combine(
         currentQuery,
         isLoading,
-        cities
+        masterTowns
     ) { query, loading, cities ->
         UiState(query, loading, cities)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), UiState())
@@ -67,7 +67,7 @@ class SearchViewModel @Inject constructor(
         // TODO
     }
 
-    fun onAddCityClicked(city: City) {
+    fun onAddTownClicked(town: MasterTown) {
         // TODO
     }
 
