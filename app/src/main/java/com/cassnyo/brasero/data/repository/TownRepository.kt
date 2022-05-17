@@ -19,6 +19,10 @@ class TownRepository @Inject constructor(
         return braseroDatabase.townDao().getTowns()
     }
 
+    fun getTownsForecast(): Flow<List<TownForecast>> {
+        return braseroDatabase.townForecastDao().getTownsForecast()
+    }
+
     fun getTownForecast(townId: String): Flow<TownForecast> {
         return braseroDatabase.townForecastDao().getTownForecastById(townId)
     }

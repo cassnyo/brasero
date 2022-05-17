@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
@@ -21,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
+import com.cassnyo.brasero.ui.screen.forecast.TownForecast
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.PagerState
@@ -47,13 +47,13 @@ fun HomeScreen(navController: NavController) {
         )
 
         HorizontalPager(
-            count = state.towns.size,
+            count = state.townsForecast.size,
             state = pagerState,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
         ) { page ->
-            Text(text = "${state.towns[page]}")
+            TownForecast(forecast = state.townsForecast[page])
         }
     }
 }
@@ -78,7 +78,9 @@ private fun Header(
 
         HorizontalPagerIndicator(
             pagerState = pagerState,
-            modifier = Modifier.align(Alignment.Bottom).padding(bottom = 16.dp),
+            modifier = Modifier
+                .align(Alignment.Bottom)
+                .padding(bottom = 16.dp),
             indicatorWidth = 4.dp
         )
 

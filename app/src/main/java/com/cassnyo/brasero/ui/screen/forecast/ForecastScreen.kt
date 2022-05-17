@@ -4,20 +4,18 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -32,7 +30,7 @@ import com.cassnyo.brasero.R
 import com.cassnyo.brasero.data.database.entity.DayForecast
 import com.cassnyo.brasero.data.database.entity.HourForecast
 import com.cassnyo.brasero.data.database.entity.Town
-import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
+import com.cassnyo.brasero.data.database.join.TownForecast
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
@@ -44,21 +42,21 @@ fun ForecastScreen(navController: NavController) {
     val forecast = viewModel.townForecast.collectAsState(initial = null).value
 
     if (forecast != null) {
-        Column(Modifier.fillMaxSize()) {
-            // FIXME Temporary
-            IconButton(onClick = { navController.navigate(NavigationRoutes.SEARCH) }) {
-                Icon(
-                    imageVector = Icons.Rounded.Search,
-                    contentDescription = "Buscar municipio"
-                )
-            }
-            Header(
-                town = forecast.town,
-                selectedHourForecast = forecast.hours.first()
-            )
-            TodayForecast(hourForecastList = forecast.hours)
-            WeekForecast(dayForecastList = forecast.days)
-        }
+        TownForecast(forecast)
+    }
+}
+
+@Composable
+fun TownForecast(
+    forecast: TownForecast
+) {
+    Column(Modifier.fillMaxSize()) {
+        Header(
+            town = forecast.town,
+            selectedHourForecast = forecast.hours.first()
+        )
+        TodayForecast(hourForecastList = forecast.hours)
+        WeekForecast(dayForecastList = forecast.days)
     }
 }
 
@@ -68,24 +66,32 @@ fun Header(
     town: Town,
     selectedHourForecast: HourForecast
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth()
+    Column(
+        modifier = modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column {
-            Text(text = "${town.townName}, ${town.provinceName}")
-            Text(
-                text = stringResource(R.string.forecast_temperature_celsius, selectedHourForecast.temperature),
-                style = MaterialTheme.typography.h1,
-                fontWeight = FontWeight.Bold
-            )
-            Text(text = selectedHourForecast.skyStatus)
-        }
-        Column {
-            SkyStatusImage(
-                modifier = Modifier.size(96.dp),
-                skyStatus = selectedHourForecast.skyStatus
-            )
-        }
+        Text(
+            text = "${town.townName}, ${town.provinceName}",
+            style = MaterialTheme.typography.h5,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        SkyStatusImage(
+            modifier = Modifier.size(96.dp),
+            skyStatus = selectedHourForecast.skyStatus
+        )
+        Text(text = selectedHourForecast.skyStatus)
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = stringResource(R.string.forecast_temperature_celsius, selectedHourForecast.temperature),
+            style = MaterialTheme.typography.h6,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 
@@ -101,7 +107,7 @@ fun TodayForecast(
         )
     ) {
         Text(
-            text = stringResource(R.string.forecast_today_title),
+            text = stringResource(R.string.forecast_next_24_hours_title),
             style = MaterialTheme.typography.h5,
             fontWeight = FontWeight.ExtraBold
         )
@@ -141,7 +147,7 @@ fun WeekForecast(
             horizontal = 16.dp,
             vertical = 8.dp
         ),
-        text = stringResource(R.string.forecast_week_title),
+        text = stringResource(R.string.forecast_7_days_title),
         style = MaterialTheme.typography.h5,
         fontWeight = FontWeight.ExtraBold
     )

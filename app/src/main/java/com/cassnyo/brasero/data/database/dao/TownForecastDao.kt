@@ -13,4 +13,8 @@ interface TownForecastDao {
     @Query("SELECT * FROM town WHERE id = :townId")
     fun getTownForecastById(townId: String): Flow<TownForecast>
 
+    @Transaction
+    @Query("SELECT * FROM town")
+    fun getTownsForecast(): Flow<List<TownForecast>>
+
 }
