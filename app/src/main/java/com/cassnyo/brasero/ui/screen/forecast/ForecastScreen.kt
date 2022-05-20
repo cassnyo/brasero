@@ -1,5 +1,8 @@
 package com.cassnyo.brasero.ui.screen.forecast
 
+import android.content.Context
+import android.content.res.Resources
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +23,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -207,7 +213,7 @@ private fun SkyStatusImage(
     modifier: Modifier = Modifier,
     skyStatus: String
 ) {
-    val skyIcon = getSkyStatusIcon(skyStatus)
+    val skyIcon = getSkyStatusIcon(LocalContext.current, skyStatus)
     if (skyIcon != null) {
         Image(
             painter = painterResource(id = skyIcon),
@@ -217,7 +223,7 @@ private fun SkyStatusImage(
     }
 }
 
-private fun getSkyStatusIcon(skyStatus: String): Int? {
+private fun getSkyStatusIcon(context: Context, skyStatus: String): Int? {
     /*
     11 - Despejado
     12 - Poco nuboso
@@ -227,10 +233,11 @@ private fun getSkyStatusIcon(skyStatus: String): Int? {
     16 - Cubierto
     17 - Nubes altas
      */
-    return when (skyStatus.removeSuffix("n")) {
-        "11" -> R.drawable.ic_sunny
-        "12" -> R.drawable.ic_sligthly_cloudy
-        "14", "15", "16", "17" -> R.drawable.ic_cloudy
-        else -> null
+    if (skyStatus.isEmpty()) return null
+    val identifier = "sky_$skyStatus"
+    return try {
+        context.resources.getIdentifier(identifier, "drawable", context.packageName)
+    } catch (e: Resources.NotFoundException) {
+        Log.w("Forecast", "Resource not found: $identifier")
     }
 }
