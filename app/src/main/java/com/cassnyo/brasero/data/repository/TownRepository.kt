@@ -59,7 +59,7 @@ class TownRepository @Inject constructor(
     ): List<DayForecast> {
         return dailyForecast.forecast.day.map { dayApi ->
             // Group sky status by its description (using description as key) and then get the most repeated status
-            val skyStatus = dayApi.skyStatus.groupBy { it.description }.maxByOrNull { it.value.size }?.key.orEmpty()
+            val skyStatus = dayApi.skyStatus.groupBy { it.value }.maxByOrNull { it.value.size }?.key.orEmpty()
             // Use highest chanceOfRain of the whole day
             val chanceOfRain = dayApi.chanceOfRain.maxOf { it.value }
             // Same as skyStatus. Group by speed/direction and get the most repeated value
@@ -104,7 +104,7 @@ class TownRepository @Inject constructor(
                 val skyStatus = day.skyStatus.firstOrNull { it.period == fixedHour }
                 val chanceOfRain = day.chanceOfRain.firstOrNull { it.period?.take(2) == fixedHour}
                 val rain = day.rain.firstOrNull { it.period == fixedHour }
-                val temperature = day.rain.firstOrNull { it.period == fixedHour }
+                val temperature = day.temperature.firstOrNull { it.period == fixedHour }
                 val wind = day.wind.firstOrNull { it.period == fixedHour }
                 val humidity = day.relativeHumidity.firstOrNull { it.period == fixedHour }
 
