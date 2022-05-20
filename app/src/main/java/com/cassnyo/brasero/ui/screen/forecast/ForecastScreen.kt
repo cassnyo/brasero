@@ -4,8 +4,11 @@ import android.content.Context
 import android.content.res.Resources
 import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,11 +19,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +45,9 @@ import com.cassnyo.brasero.data.database.entity.DayForecast
 import com.cassnyo.brasero.data.database.entity.HourForecast
 import com.cassnyo.brasero.data.database.entity.Town
 import com.cassnyo.brasero.data.database.join.TownForecast
+import com.cassnyo.brasero.ui.theme.ColorOnPrimary
+import com.cassnyo.brasero.ui.theme.ColorOnSurface
+import com.cassnyo.brasero.ui.theme.ColorPrimary
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
@@ -56,12 +67,18 @@ fun ForecastScreen(navController: NavController) {
 fun TownForecast(
     forecast: TownForecast
 ) {
+    var selectedHourForecast by remember { mutableStateOf(forecast.hours.first()) }
+
     Column(Modifier.fillMaxSize()) {
         Header(
             town = forecast.town,
-            selectedHourForecast = forecast.hours.first()
+            selectedHourForecast = selectedHourForecast
         )
-        TodayForecast(hourForecastList = forecast.hours)
+        TodayForecast(
+            hourForecastList = forecast.hours,
+            selectedHourForecast = selectedHourForecast,
+            onHourForecastClicked = { selectedHourForecast = it }
+        )
         WeekForecast(dayForecastList = forecast.days)
     }
 }
@@ -103,8 +120,10 @@ fun Header(
 
 @Composable
 fun TodayForecast(
-    modifier: Modifier = Modifier,
-    hourForecastList: List<HourForecast>
+    hourForecastList: List<HourForecast>,
+    selectedHourForecast: HourForecast,
+    onHourForecastClicked: (HourForecast) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier.padding(
@@ -117,9 +136,21 @@ fun TodayForecast(
             style = MaterialTheme.typography.h5,
             fontWeight = FontWeight.ExtraBold
         )
-        LazyRow {
-            items(hourForecastList) { hourForecast ->
-                HourForecastItem(hourForecast = hourForecast)
+        LazyRow(
+            contentPadding = PaddingValues(
+                vertical = 4.dp,
+                horizontal = 4.dp
+            )
+        ) {
+            items(
+                items = hourForecastList,
+                key = { it.date }
+            ) { hourForecast ->
+                HourForecastItem(
+                    hourForecast = hourForecast,
+                    selectedHourForecast = selectedHourForecast,
+                    onHourForecastClicked = onHourForecastClicked
+                )
             }
         }
     }
@@ -127,19 +158,42 @@ fun TodayForecast(
 
 @Composable
 fun HourForecastItem(
-    modifier: Modifier = Modifier,
-    hourForecast: HourForecast
+    hourForecast: HourForecast,
+    selectedHourForecast: HourForecast,
+    onHourForecastClicked: (HourForecast) -> Unit,
+    modifier: Modifier = Modifier
 ) {
+    val (backgroundColor, textColor) = when (hourForecast) {
+        selectedHourForecast -> Pair(ColorPrimary.copy(alpha = 0.4f), ColorOnPrimary)
+        else -> Pair(Color.Transparent, ColorOnSurface)
+    }
     Column(
-        modifier = modifier.padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier
+            .clip(RoundedCornerShape(size = 4.dp))
+            .clickable { onHourForecastClicked(hourForecast) }
+            .background(backgroundColor)
+            .padding(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(text = hourForecast.date.format(DateTimeFormatter.ofPattern("HH:mm")))
+        Text(
+            text = hourForecast.date.format(DateTimeFormatter.ofPattern("HH:mm")),
+            color = textColor,
+            style = MaterialTheme.typography.subtitle1
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
         SkyStatusImage(
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(48.dp),
             skyStatus = hourForecast.skyStatus
         )
-        Text(text = stringResource(R.string.forecast_temperature_celsius, hourForecast.temperature))
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = stringResource(R.string.forecast_temperature_celsius, hourForecast.temperature),
+            color = textColor,
+            style = MaterialTheme.typography.h6,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 
