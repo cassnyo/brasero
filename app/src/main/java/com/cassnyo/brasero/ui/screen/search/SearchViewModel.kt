@@ -68,8 +68,10 @@ class SearchViewModel @Inject constructor(
         // TODO
     }
 
-    fun onAddTownClicked(town: MasterTown) {
-        // TODO
+    fun onAddTownClicked(town: Town) {
+        viewModelScope.launch {
+            townRepository.updateTown(town.copy(isFavorite = true))
+        }
     }
 
 }
