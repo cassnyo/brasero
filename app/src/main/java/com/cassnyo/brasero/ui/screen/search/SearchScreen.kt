@@ -27,6 +27,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.TaskAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,8 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cassnyo.brasero.R
+import com.cassnyo.brasero.data.database.entity.Town
 import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
-import com.cassnyo.brasero.ui.model.MasterTown
 
 @Composable
 fun SearchScreen(navController: NavController) {
@@ -66,11 +67,11 @@ fun SearchScreen(navController: NavController) {
         ) {
             when {
                 state.query.isEmpty() -> SearchPlaceholder()
-                !state.isLoading && state.masterTowns.isEmpty() -> NoResultsFound(state.query)
+                !state.isLoading && state.towns.isEmpty() -> NoResultsFound(state.query)
             }
 
             TownsList(
-                masterTowns = state.masterTowns,
+                towns = state.towns,
                 onTownClicked = { town ->
                     navController.navigate(NavigationRoutes.forecast(town.id))
                 },
@@ -202,9 +203,9 @@ fun NoResultsFound(
 
 @Composable
 fun TownsList(
-    masterTowns: List<MasterTown>,
-    onTownClicked: (MasterTown) -> Unit,
-    onAddTownClicked: (MasterTown) -> Unit,
+    towns: List<Town>,
+    onTownClicked: (Town) -> Unit,
+    onAddTownClicked: (Town) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -212,7 +213,7 @@ fun TownsList(
         modifier = modifier
     ) {
         items(
-            items = masterTowns,
+            items = towns,
         ) { town ->
             Row(
                 modifier = Modifier
@@ -223,12 +224,19 @@ fun TownsList(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = town.name)
-                IconButton(onClick = { onAddTownClicked(town) }) {
+                Text(text = town.townName)
+                if (town.isFavorite) {
                     Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = "Añadir municipio"
+                        imageVector = Icons.Rounded.TaskAlt,
+                        contentDescription = "Municipio favorito"
                     )
+                } else {
+                    IconButton(onClick = { onAddTownClicked(town) }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Add,
+                            contentDescription = "Añadir municipio"
+                        )
+                    }
                 }
             }
         }

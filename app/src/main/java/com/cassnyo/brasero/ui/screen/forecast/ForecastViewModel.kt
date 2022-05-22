@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cassnyo.brasero.data.database.join.TownForecast
-import com.cassnyo.brasero.data.repository.TownRepository
+import com.cassnyo.brasero.data.repository.TownForecastRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -15,11 +15,11 @@ import javax.inject.Inject
 @HiltViewModel
 class ForecastViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val townRepository: TownRepository
+    private val townForecastRepository: TownForecastRepository
 ): ViewModel() {
 
     val townId = savedStateHandle.get<String>("townId").orEmpty()
-    val townForecast: Flow<TownForecast?> = townRepository.getTownForecast(townId).flowOn(Dispatchers.IO)
+    val townForecast: Flow<TownForecast?> = townForecastRepository.getTownForecast(townId).flowOn(Dispatchers.IO)
 
     init {
         refreshForecast()
@@ -27,7 +27,7 @@ class ForecastViewModel @Inject constructor(
 
     private fun refreshForecast() {
         viewModelScope.launch(Dispatchers.IO) {
-            townRepository.refreshTownForecast(townId)
+            townForecastRepository.refreshTownForecast(townId)
         }
     }
 

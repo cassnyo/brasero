@@ -3,7 +3,7 @@ package com.cassnyo.brasero.ui.screen.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cassnyo.brasero.data.database.entity.Town
-import com.cassnyo.brasero.data.repository.MasterTownRepository
+import com.cassnyo.brasero.data.repository.TownRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,11 +14,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val masterTownRepository: MasterTownRepository
+    private val townRepository: TownRepository
 ) : ViewModel() {
 
     data class UiState(
@@ -39,7 +40,7 @@ class SearchViewModel @Inject constructor(
         .flatMapLatest { query ->
             when {
                 query.isEmpty() -> flowOf(emptyList())
-                else -> masterTownRepository.getMasterTowns(query)
+                else -> townRepository.getMasterTowns(query)
             }
         }
         .onEach {

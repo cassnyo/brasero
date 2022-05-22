@@ -67,20 +67,22 @@ fun ForecastScreen(navController: NavController) {
 fun TownForecast(
     forecast: TownForecast
 ) {
-    var selectedHourForecast by remember { mutableStateOf(forecast.hours.first()) }
+   if (forecast.hours.isNotEmpty()) {
+       var selectedHourForecast by remember { mutableStateOf(forecast.hours.first()) }
 
-    Column(Modifier.fillMaxSize()) {
-        Header(
-            town = forecast.town,
-            selectedHourForecast = selectedHourForecast
-        )
-        TodayForecast(
-            hourForecastList = forecast.hours,
-            selectedHourForecast = selectedHourForecast,
-            onHourForecastClicked = { selectedHourForecast = it }
-        )
-        WeekForecast(dayForecastList = forecast.days)
-    }
+       Column(Modifier.fillMaxSize()) {
+           Header(
+               town = forecast.town,
+               selectedHourForecast = selectedHourForecast
+           )
+           TodayForecast(
+               hourForecastList = forecast.hours,
+               selectedHourForecast = selectedHourForecast,
+               onHourForecastClicked = { selectedHourForecast = it }
+           )
+           WeekForecast(dayForecastList = forecast.days)
+       }
+   }
 }
 
 @Composable
