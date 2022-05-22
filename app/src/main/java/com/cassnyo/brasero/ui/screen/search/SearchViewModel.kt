@@ -2,8 +2,8 @@ package com.cassnyo.brasero.ui.screen.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cassnyo.brasero.data.database.entity.Town
 import com.cassnyo.brasero.data.repository.MasterTownRepository
-import com.cassnyo.brasero.ui.model.MasterTown
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,12 +24,12 @@ class SearchViewModel @Inject constructor(
     data class UiState(
         val query: String = "",
         val isLoading: Boolean = false,
-        val masterTowns: List<MasterTown> = emptyList()
+        val towns: List<Town> = emptyList()
     )
 
     private val currentQuery = MutableStateFlow("")
     private val isLoading = MutableStateFlow(false)
-    private val masterTowns: Flow<List<MasterTown>> = currentQuery
+    private val towns: Flow<List<Town>> = currentQuery
         .debounce(125L)
         .onEach { query ->
             if (query.isNotEmpty()) {
@@ -50,9 +50,9 @@ class SearchViewModel @Inject constructor(
     val state: Flow<UiState> = combine(
         currentQuery,
         isLoading,
-        masterTowns
-    ) { query, loading, cities ->
-        UiState(query, loading, cities)
+        towns
+    ) { query, loading, towns ->
+        UiState(query, loading, towns)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), UiState())
 
     fun onQueryChanged(query: String) {
