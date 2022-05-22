@@ -15,8 +15,8 @@ class TownForecastRepository @Inject constructor(
     private val braseroDatabase: BraseroDatabase
 ) {
 
-    fun getTownsForecast(): Flow<List<TownForecast>> {
-        return braseroDatabase.townForecastDao().getTownsForecast()
+    fun getFavoriteTownsForecast(): Flow<List<TownForecast>> {
+        return braseroDatabase.townForecastDao().getFavoriteTownsForecast()
     }
 
     fun getTownForecast(townId: String): Flow<TownForecast> {

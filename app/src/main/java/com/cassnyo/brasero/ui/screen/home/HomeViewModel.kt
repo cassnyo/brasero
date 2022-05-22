@@ -24,7 +24,7 @@ class HomeViewModel @Inject constructor(
 
     private val isLoading = MutableStateFlow(false)
     private val townsForecast: Flow<List<TownForecast>> = townForecastRepository
-        .getTownsForecast()
+        .getFavoriteTownsForecast()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     val state: Flow<UiState> = combine(isLoading, townsForecast) { isLoading, townsForecast ->
