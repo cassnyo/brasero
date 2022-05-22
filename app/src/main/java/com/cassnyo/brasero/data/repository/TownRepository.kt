@@ -38,7 +38,8 @@ class TownRepository @Inject constructor(
         val forecast = Town(
             id = townId,
             townName = dailyForecast.name,
-            provinceName = dailyForecast.province
+            provinceName = dailyForecast.province,
+            isFavorite = true
         )
         val dailyForecastEntities = mapDailyForecastToEntities(dailyForecast, townId)
         val hourlyForecastEntities = mapHourlyForecastToEntities(hourlyForecast, townId)
