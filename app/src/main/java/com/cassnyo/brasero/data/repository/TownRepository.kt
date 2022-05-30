@@ -7,8 +7,10 @@ import com.cassnyo.brasero.data.database.entity.Town
 import com.cassnyo.brasero.data.network.AemetApi
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.time.LocalDateTime
@@ -21,25 +23,15 @@ class TownRepository @Inject constructor(
     @ApplicationContext private val appContext: Context
 ) {
 
-    private val prefs = appContext.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+    companion object {
+        const val PREFERENCES_NAME = "master_towns_cache"
+        const val KEY_VALID_UNTIL = "valid_until"
+    }
 
-    // FIXME Improve caching
-    suspend fun getMasterTowns(query: String): Flow<List<Town>> = withContext(Dispatchers.IO) {
-        if (!cacheIsValid()) {
-            Timber.d("Cache is not valid. Fetching from API")
-            launch {
-                val response = aemetApi.getMasterTowns().map { it.toTown() }
-                braseroDatabase.townDao().saveTowns(response)
-                prefs.edit {
-                    putString(
-                        "valid_until",
-                        LocalDateTime.now().plusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                    )
-                }
-            }
-        } else {
-            Timber.d("Cache is valid")
-        }
+    private val preferences = appContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+    private val timeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+
+    suspend fun getTowns(query: String): Flow<List<Town>> = withContext(Dispatchers.IO) {
         braseroDatabase.townDao().getTowns(query)
     }
 
@@ -47,10 +39,29 @@ class TownRepository @Inject constructor(
         braseroDatabase.townDao().updateTown(town)
     }
 
-    private fun cacheIsValid(): Boolean {
-        val cacheValidUntilString = prefs.getString("valid_until", null) ?: return false
-        val cacheValidUntil = LocalDateTime.parse(cacheValidUntilString, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-        return cacheValidUntil.isBefore(LocalDateTime.now())
+    suspend fun refreshTowns() = withContext(Dispatchers.IO) {
+        if (shouldRefreshTowns()) {
+            val response = aemetApi.getMasterTowns().map { it.toTown() }
+            braseroDatabase.townDao().saveTowns(response)
+            updateCacheAvailability()
+        }
+    }
+
+    private fun updateCacheAvailability() {
+        // Valid for 7 days
+        val validUntil = LocalDateTime.now().plusWeeks(1).format(timeFormatter)
+        preferences.edit {
+            putString(
+                KEY_VALID_UNTIL,
+                validUntil
+            )
+        }
+    }
+
+    private fun shouldRefreshTowns(): Boolean {
+        val validUntilString = preferences.getString(KEY_VALID_UNTIL, null) ?: return false
+        val validUntil = LocalDateTime.parse(validUntilString, timeFormatter)
+        return LocalDateTime.now().isAfter(validUntil)
     }
 
 }
