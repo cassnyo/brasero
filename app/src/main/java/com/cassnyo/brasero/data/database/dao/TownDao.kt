@@ -10,7 +10,7 @@ interface TownDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun saveTown(town: Town)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     fun saveTowns(towns: List<Town>)
 
     @Query("DELETE FROM town WHERE id = :townId")
