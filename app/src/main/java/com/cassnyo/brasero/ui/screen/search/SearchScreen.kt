@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -42,11 +43,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cassnyo.brasero.R
 import com.cassnyo.brasero.data.database.entity.Town
+import com.cassnyo.brasero.ui.common.component.PrettyLoading
 import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
 
 @Composable
@@ -66,6 +69,11 @@ fun SearchScreen(navController: NavController) {
             modifier = Modifier.fillMaxSize()
         ) {
             when {
+                state.isRefreshingTowns -> PrettyLoading(
+                    modifier = Modifier.align(Alignment.Center),
+                    message = "Obteniendo ciudades disponibles",
+                    size = 80.dp
+                )
                 state.query.isEmpty() -> SearchPlaceholder()
                 !state.isLoading && state.towns.isEmpty() -> NoResultsFound(state.query)
             }
