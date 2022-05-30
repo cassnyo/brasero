@@ -1,6 +1,6 @@
 package com.cassnyo.brasero.data.network.response.common
 
-import com.cassnyo.brasero.ui.model.MasterTown
+import com.cassnyo.brasero.data.database.entity.Town
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
@@ -19,7 +19,12 @@ data class MasterTownApi(
     @Json(name = "longitud_dec") val longitudeDec: String,
     @Json(name = "destacada") val highlighted: String
 ) {
-    fun toMasterTown(): MasterTown {
-        return MasterTown(this.id.removePrefix("id"), this.name)
+    fun toTown(): Town {
+        return Town(
+            id = this.id,
+            townName = this.name,
+            provinceName = this.capital,
+            isFavorite = false
+        )
     }
 }

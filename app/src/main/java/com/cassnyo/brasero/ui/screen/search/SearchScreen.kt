@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.TaskAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,12 +43,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cassnyo.brasero.R
+import com.cassnyo.brasero.data.database.entity.Town
+import com.cassnyo.brasero.ui.common.component.PrettyLoading
 import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
-import com.cassnyo.brasero.ui.model.MasterTown
 
 @Composable
 fun SearchScreen(navController: NavController) {
@@ -65,12 +69,17 @@ fun SearchScreen(navController: NavController) {
             modifier = Modifier.fillMaxSize()
         ) {
             when {
+                state.isRefreshingTowns -> PrettyLoading(
+                    modifier = Modifier.align(Alignment.Center),
+                    message = "Obteniendo ciudades disponibles",
+                    size = 80.dp
+                )
                 state.query.isEmpty() -> SearchPlaceholder()
-                !state.isLoading && state.masterTowns.isEmpty() -> NoResultsFound(state.query)
+                !state.isLoading && state.towns.isEmpty() -> NoResultsFound(state.query)
             }
 
             TownsList(
-                masterTowns = state.masterTowns,
+                towns = state.towns,
                 onTownClicked = { town ->
                     navController.navigate(NavigationRoutes.forecast(town.id))
                 },
@@ -194,6 +203,7 @@ fun NoResultsFound(
         Text(
             text = "No hemos podido encontrar \"$query\"",
             modifier = Modifier.padding(24.dp),
+            textAlign = TextAlign.Center,
             style = MaterialTheme.typography.h6,
             fontWeight = FontWeight.SemiBold
         )
@@ -202,9 +212,9 @@ fun NoResultsFound(
 
 @Composable
 fun TownsList(
-    masterTowns: List<MasterTown>,
-    onTownClicked: (MasterTown) -> Unit,
-    onAddTownClicked: (MasterTown) -> Unit,
+    towns: List<Town>,
+    onTownClicked: (Town) -> Unit,
+    onAddTownClicked: (Town) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -212,7 +222,7 @@ fun TownsList(
         modifier = modifier
     ) {
         items(
-            items = masterTowns,
+            items = towns,
         ) { town ->
             Row(
                 modifier = Modifier
@@ -223,12 +233,20 @@ fun TownsList(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = town.name)
-                IconButton(onClick = { onAddTownClicked(town) }) {
+                Text(text = town.townName)
+                if (town.isFavorite) {
                     Icon(
-                        imageVector = Icons.Rounded.Add,
-                        contentDescription = "Añadir municipio"
+                        modifier = Modifier.size(48.dp).padding(12.dp), // Same size/padding as an IconButton
+                        imageVector = Icons.Rounded.TaskAlt,
+                        contentDescription = "Municipio favorito"
                     )
+                } else {
+                    IconButton(onClick = { onAddTownClicked(town) }) {
+                        Icon(
+                            imageVector = Icons.Rounded.Add,
+                            contentDescription = "Añadir municipio"
+                        )
+                    }
                 }
             }
         }

@@ -1,159 +1,67 @@
 package com.cassnyo.brasero.data.repository
 
+import android.content.Context
+import androidx.core.content.edit
 import com.cassnyo.brasero.data.database.BraseroDatabase
-import com.cassnyo.brasero.data.database.entity.*
-import com.cassnyo.brasero.data.database.join.TownForecast
+import com.cassnyo.brasero.data.database.entity.Town
 import com.cassnyo.brasero.data.network.AemetApi
-import com.cassnyo.brasero.data.network.response.common.ForecastApi
-import com.cassnyo.brasero.data.network.response.daily.DailyForecastItemDayApi
-import com.cassnyo.brasero.data.network.response.hourly.HourlyForecastItemDayApi
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.withContext
+import timber.log.Timber
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 class TownRepository @Inject constructor(
     private val aemetApi: AemetApi,
-    private val braseroDatabase: BraseroDatabase
+    private val braseroDatabase: BraseroDatabase,
+    @ApplicationContext private val appContext: Context
 ) {
 
-    fun getTowns(): Flow<List<Town>> {
-        return braseroDatabase.townDao().getTowns()
+    companion object {
+        const val PREFERENCES_NAME = "master_towns_cache"
+        const val KEY_VALID_UNTIL = "valid_until"
     }
 
-    fun getTownsForecast(): Flow<List<TownForecast>> {
-        return braseroDatabase.townForecastDao().getTownsForecast()
+    private val preferences = appContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
+    private val timeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+
+    suspend fun getTowns(query: String): Flow<List<Town>> = withContext(Dispatchers.IO) {
+        braseroDatabase.townDao().getTowns(query)
     }
 
-    fun getTownForecast(townId: String): Flow<TownForecast> {
-        return braseroDatabase.townForecastDao().getTownForecastById(townId)
+    suspend fun updateTown(town: Town) = withContext(Dispatchers.IO) {
+        braseroDatabase.townDao().updateTown(town)
     }
 
-    suspend fun refreshTownForecast(townId: String) {
-        // TODO Observe Room query for a single town
-        // TODO refresh daily forecast
-        // TODO refresh hourly forecast
-        // TODO execute in parallel
-        val dailyForecast = getDailyForecastByTown(townId)
-        val hourlyForecast = getHourlyForecastByTown(townId)
-
-        val forecast = Town(
-            id = townId,
-            townName = dailyForecast.name,
-            provinceName = dailyForecast.province
-        )
-        val dailyForecastEntities = mapDailyForecastToEntities(dailyForecast, townId)
-        val hourlyForecastEntities = mapHourlyForecastToEntities(hourlyForecast, townId)
-
-        with(braseroDatabase) {
-            runInTransaction {
-                townDao().deleteTown(townId)
-                townDao().saveTown(forecast)
-                dayForecastDao().saveDailyForecast(dailyForecastEntities)
-                hourForecastDao().saveHourlyForecast(hourlyForecastEntities)
-            }
+    suspend fun refreshTowns() = withContext(Dispatchers.IO) {
+        if (shouldRefreshTowns()) {
+            val response = aemetApi.getMasterTowns().map { it.toTown() }
+            braseroDatabase.townDao().saveTowns(response)
+            updateCacheAvailability()
         }
     }
 
-    private fun mapDailyForecastToEntities(
-        dailyForecast: ForecastApi<DailyForecastItemDayApi>,
-        townId: String
-    ): List<DayForecast> {
-        return dailyForecast.forecast.day.map { dayApi ->
-            // Group sky status by its description (using description as key) and then get the most repeated status
-            val skyStatus = dayApi.skyStatus.groupBy { it.value }.maxByOrNull { it.value.size }?.key.orEmpty()
-            // Use highest chanceOfRain of the whole day
-            val chanceOfRain = dayApi.chanceOfRain.maxOf { it.value }
-            // Same as skyStatus. Group by speed/direction and get the most repeated value
-            val windSpeed = dayApi.wind.groupBy { it.speed }.maxByOrNull { it.value.size }?.key ?: 0
-            val windDirection = dayApi.wind.groupBy { it.direction }.maxByOrNull { it.value.size }?.key.orEmpty()
-
-            DayForecast(
-                townId = townId,
-                date = dayApi.date.toLocalDate(),
-                skyStatus = skyStatus,
-                chanceOfRain = chanceOfRain,
-                wind = Wind(
-                    windSpeed = windSpeed,
-                    windDirection = windDirection
-                ),
-                temperature = Temperature(
-                    minTemperature = dayApi.temperature.minimum,
-                    maxTemperature = dayApi.temperature.maximum
-                ),
-                humidity = Humidity(
-                    minHumidity = dayApi.relativeHumidity.minimum,
-                    maxHumidity = dayApi.relativeHumidity.maximum
-                )
+    private fun updateCacheAvailability() {
+        // Valid for 7 days
+        val validUntil = LocalDateTime.now().plusWeeks(1).format(timeFormatter)
+        preferences.edit {
+            putString(
+                KEY_VALID_UNTIL,
+                validUntil
             )
         }
     }
 
-    private fun mapHourlyForecastToEntities(
-        hourlyForecast: ForecastApi<HourlyForecastItemDayApi>,
-        townId: String
-    ): List<HourForecast> {
-        val hourForecastMap = mutableListOf<HourForecast>()
-
-        hourlyForecast.forecast.day.forEach { day ->
-
-            (0 .. 24).forEach { hour ->
-                val fixedHour = when {
-                    hour < 10 -> "0$hour"
-                    else -> hour.toString().take(2)
-                }
-
-                val skyStatus = day.skyStatus.firstOrNull { it.period == fixedHour }
-                val chanceOfRain = day.chanceOfRain.firstOrNull { it.period?.take(2) == fixedHour}
-                val rain = day.rain.firstOrNull { it.period == fixedHour }
-                val temperature = day.temperature.firstOrNull { it.period == fixedHour }
-                val wind = day.wind.firstOrNull { it.period == fixedHour }
-                val humidity = day.relativeHumidity.firstOrNull { it.period == fixedHour }
-
-                if (skyStatus != null ||
-                    chanceOfRain != null ||
-                    rain != null ||
-                    temperature != null ||
-                    wind != null ||
-                    humidity != null) {
-                    val rainValue = try {
-                        rain?.value?.toInt() ?: 0
-                    } catch (e: NumberFormatException) {
-                        0
-                    }
-                    val temperatureValue = try {
-                        temperature?.value?.toInt() ?: 0
-                    } catch (e: NumberFormatException) {
-                        0
-                    }
-                    val forecast = HourForecast(
-                        townId = townId,
-                        date = day.date.withHour(hour),
-                        skyStatus = skyStatus?.value.orEmpty(),
-                        chanceOfRain = chanceOfRain?.value?.toInt() ?: 0,
-                        rain = rainValue,
-                        temperature = temperatureValue,
-                        wind = Wind(
-                            windSpeed = wind?.speed?.firstOrNull()?.toInt() ?: 0,
-                            windDirection = wind?.direction?.firstOrNull().orEmpty()
-                        ),
-                        humidity = humidity?.value?.toInt() ?: 0
-                    )
-
-                    hourForecastMap.add(forecast)
-                }
-            }
-        }
-
-        return hourForecastMap
-    }
-
-    private suspend fun getDailyForecastByTown(townId: String): ForecastApi<DailyForecastItemDayApi> {
-        val wrapper = aemetApi.getDailyForecastByTownWrapper(townId)
-        return aemetApi.getDailyForecastByTown(wrapper.data).first()
-    }
-
-    private suspend fun getHourlyForecastByTown(townId: String): ForecastApi<HourlyForecastItemDayApi> {
-        val wrapper = aemetApi.getHourlyForecastByTownWrapper(townId)
-        return aemetApi.getHourlyForecastByTown(wrapper.data).first()
+    private fun shouldRefreshTowns(): Boolean {
+        val validUntilString = preferences.getString(KEY_VALID_UNTIL, null) ?: return false
+        val validUntil = LocalDateTime.parse(validUntilString, timeFormatter)
+        return LocalDateTime.now().isAfter(validUntil)
     }
 
 }

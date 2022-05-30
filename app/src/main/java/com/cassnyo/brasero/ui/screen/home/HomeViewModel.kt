@@ -3,7 +3,7 @@ package com.cassnyo.brasero.ui.screen.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cassnyo.brasero.data.database.join.TownForecast
-import com.cassnyo.brasero.data.repository.TownRepository
+import com.cassnyo.brasero.data.repository.TownForecastRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val townRepository: TownRepository
+    private val townForecastRepository: TownForecastRepository
 ) : ViewModel() {
 
     data class UiState(
@@ -23,8 +23,8 @@ class HomeViewModel @Inject constructor(
     )
 
     private val isLoading = MutableStateFlow(false)
-    private val townsForecast: Flow<List<TownForecast>> = townRepository
-        .getTownsForecast()
+    private val townsForecast: Flow<List<TownForecast>> = townForecastRepository
+        .getFavoriteTownsForecast()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     val state: Flow<UiState> = combine(isLoading, townsForecast) { isLoading, townsForecast ->
