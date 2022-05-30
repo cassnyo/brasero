@@ -203,6 +203,7 @@ fun NoResultsFound(
         Text(
             text = "No hemos podido encontrar \"$query\"",
             modifier = Modifier.padding(24.dp),
+            textAlign = TextAlign.Center,
             style = MaterialTheme.typography.h6,
             fontWeight = FontWeight.SemiBold
         )
@@ -235,6 +236,7 @@ fun TownsList(
                 Text(text = town.townName)
                 if (town.isFavorite) {
                     Icon(
+                        modifier = Modifier.size(48.dp).padding(12.dp), // Same size/padding as an IconButton
                         imageVector = Icons.Rounded.TaskAlt,
                         contentDescription = "Municipio favorito"
                     )
