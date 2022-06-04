@@ -31,6 +31,8 @@ class TownRepository @Inject constructor(
     private val preferences = appContext.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
     private val timeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
+    fun getFavoriteTowns(): Flow<List<Town>> = braseroDatabase.townDao().getFavoriteTowns()
+
     suspend fun getTowns(query: String): Flow<List<Town>> = withContext(Dispatchers.IO) {
         braseroDatabase.townDao().getTowns(query)
     }

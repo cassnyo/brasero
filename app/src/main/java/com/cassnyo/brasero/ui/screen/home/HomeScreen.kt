@@ -47,13 +47,14 @@ fun HomeScreen(navController: NavController) {
         )
 
         HorizontalPager(
-            count = state.townsForecast.size,
+            count = state.favoriteTowns.size,
             state = pagerState,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
         ) { page ->
-            TownForecast(forecast = state.townsForecast[page])
+            // FIXME Refactor TownForecast to receive a favorite town's id instead of the forecast
+            // TownForecast(forecast = state.favoriteTowns[page])
         }
     }
 }
