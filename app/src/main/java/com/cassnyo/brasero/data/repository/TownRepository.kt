@@ -61,7 +61,7 @@ class TownRepository @Inject constructor(
     }
 
     private fun shouldRefreshTowns(): Boolean {
-        val validUntilString = preferences.getString(KEY_VALID_UNTIL, null) ?: return false
+        val validUntilString = preferences.getString(KEY_VALID_UNTIL, null) ?: return true
         val validUntil = LocalDateTime.parse(validUntilString, timeFormatter)
         return LocalDateTime.now().isAfter(validUntil)
     }
