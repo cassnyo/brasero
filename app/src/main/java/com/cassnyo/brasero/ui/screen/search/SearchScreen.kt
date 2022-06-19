@@ -69,13 +69,8 @@ fun SearchScreen(navController: NavController) {
             modifier = Modifier.fillMaxSize()
         ) {
             when {
-                state.isRefreshingTowns -> PrettyLoading(
-                    modifier = Modifier.align(Alignment.Center),
-                    message = "Obteniendo ciudades disponibles",
-                    size = 80.dp
-                )
-                state.query.isEmpty() -> SearchPlaceholder()
-                !state.isLoading && state.towns.isEmpty() -> NoResultsFound(state.query)
+                state.isRefreshingTowns -> RefreshTownsLoading(modifier = Modifier.align(Alignment.Center))
+                !state.isLoading && state.query.isNotEmpty() && state.towns.isEmpty() -> NoResultsFound(state.query)
             }
 
             TownsList(
@@ -118,7 +113,9 @@ fun TopBar(
             query = query,
             onQueryChanged = onQueryChanged,
             onClearQueryClicked = onClearQueryClicked,
-            modifier = Modifier.weight(1f).fillMaxWidth()
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
         )
     }
 }
@@ -164,22 +161,6 @@ fun SearchField(
     LaunchedEffect(Unit) {
         // Request focus to open the keyboard
         focusRequester.requestFocus()
-    }
-}
-
-@Composable
-fun SearchPlaceholder(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colors.surface),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.bg_search_placeholder),
-            contentDescription = "Buscar municipio",
-            modifier = modifier.width(240.dp),
-        )
     }
 }
 
@@ -236,7 +217,9 @@ fun TownsList(
                 Text(text = town.townName)
                 if (town.isFavorite) {
                     Icon(
-                        modifier = Modifier.size(48.dp).padding(12.dp), // Same size/padding as an IconButton
+                        modifier = Modifier
+                            .size(48.dp)
+                            .padding(12.dp), // Same size/padding as an IconButton
                         imageVector = Icons.Rounded.TaskAlt,
                         contentDescription = "Municipio favorito"
                     )
@@ -251,4 +234,15 @@ fun TownsList(
             }
         }
     }
+}
+
+@Composable
+fun RefreshTownsLoading(
+    modifier: Modifier = Modifier
+) {
+    PrettyLoading(
+        modifier = modifier,
+        message = "Obteniendo ciudades disponibles",
+        size = 80.dp
+    )
 }
