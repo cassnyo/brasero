@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -69,8 +71,12 @@ fun TownForecast(
 ) {
    if (forecast.hours.isNotEmpty()) {
        var selectedHourForecast by remember { mutableStateOf(forecast.hours.first()) }
+       val scrollState = rememberScrollState()
 
-       Column(Modifier.fillMaxSize()) {
+       Column(modifier = Modifier
+           .fillMaxSize()
+           .verticalScroll(state = scrollState)
+       ) {
            Header(
                town = forecast.town,
                selectedHourForecast = selectedHourForecast
@@ -80,7 +86,10 @@ fun TownForecast(
                selectedHourForecast = selectedHourForecast,
                onHourForecastClicked = { selectedHourForecast = it }
            )
-           WeekForecast(dayForecastList = forecast.days)
+           WeekForecast(
+               modifier = Modifier.weight(1f, false),
+               dayForecastList = forecast.days
+           )
        }
    }
 }
@@ -213,10 +222,8 @@ fun WeekForecast(
         style = MaterialTheme.typography.h5,
         fontWeight = FontWeight.ExtraBold
     )
-    LazyColumn(modifier = modifier) {
-        items(dayForecastList) { dayForecast ->
-            DayForecastItem(dayForecast = dayForecast)
-        }
+    dayForecastList.forEach { dayForecast ->
+        DayForecastItem(dayForecast = dayForecast)
     }
 }
 
