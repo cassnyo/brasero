@@ -15,14 +15,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowBack
@@ -39,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -51,6 +53,7 @@ import com.cassnyo.brasero.R
 import com.cassnyo.brasero.data.database.entity.Town
 import com.cassnyo.brasero.ui.common.component.PrettyLoading
 import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
+import com.cassnyo.brasero.ui.theme.ColorBackground
 
 @Composable
 fun SearchScreen(navController: NavController) {
@@ -92,30 +95,38 @@ fun TopBar(
     onClearQueryClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(
-                top = 4.dp,
-                end = 4.dp,
-                bottom = 4.dp
-            ),
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = modifier.fillMaxWidth()
     ) {
-        IconButton(onClick = onBackClicked) {
-            Icon(
-                imageVector = Icons.Rounded.ArrowBack,
-                contentDescription = "Volver atrás"
-            )
-        }
+        TopAppBar(
+            modifier = modifier.fillMaxWidth(),
+            title = {
+                Text(text = "Buscar municipio")
+            },
+            navigationIcon = {
+                IconButton(onClick = onBackClicked) {
+                    Icon(
+                        imageVector = Icons.Rounded.ArrowBack,
+                        contentDescription = "Volver atrás"
+                    )
+                }
+            },
+            elevation = 0.dp,
+            backgroundColor = ColorBackground
+        )
 
         SearchField(
             query = query,
             onQueryChanged = onQueryChanged,
             onClearQueryClicked = onClearQueryClicked,
             modifier = Modifier
-                .weight(1f)
                 .fillMaxWidth()
+                .padding(
+                    start = 8.dp,
+                    top = 4.dp,
+                    end = 8.dp,
+                    bottom = 0.dp
+                )
         )
     }
 }
@@ -128,12 +139,18 @@ fun SearchField(
     modifier: Modifier = Modifier
 ) {
     val focusRequester = remember { FocusRequester() }
-    OutlinedTextField(
+    TextField(
         value = query,
         onValueChange = onQueryChanged,
         modifier = modifier.focusRequester(focusRequester),
         placeholder = {
-            Text(text = "Buscar municipio")
+            Text(text = "Introduzca el nombre del municipio")
+        },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Rounded.Search,
+                contentDescription = "Buscar municipio"
+            )
         },
         trailingIcon = {
             if (query.isNotEmpty()) {
@@ -143,11 +160,6 @@ fun SearchField(
                         contentDescription = "Limpiar búsqueda"
                     )
                 }
-            } else {
-                Icon(
-                    imageVector = Icons.Rounded.Search,
-                    contentDescription = "Buscar municipio"
-                )
             }
         },
         keyboardOptions = KeyboardOptions(
@@ -155,7 +167,11 @@ fun SearchField(
             keyboardType = KeyboardType.Text
         ),
         singleLine = true,
-        shape = CircleShape
+        shape = RoundedCornerShape(size = 8.dp),
+        colors = TextFieldDefaults.textFieldColors(
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent
+        )
     )
     
     LaunchedEffect(Unit) {
