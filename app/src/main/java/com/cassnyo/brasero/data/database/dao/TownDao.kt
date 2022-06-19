@@ -19,7 +19,7 @@ interface TownDao {
     @Query("SELECT * FROM town WHERE townName LIKE '%' || :name || '%'")
     fun getTowns(name: String): Flow<List<Town>>
 
-    @Query("SELECT * FROM town WHERE isFavorite")
+    @Query("SELECT * FROM town WHERE isFavorite = 1")
     fun getFavoriteTowns(): Flow<List<Town>>
 
     @Update
