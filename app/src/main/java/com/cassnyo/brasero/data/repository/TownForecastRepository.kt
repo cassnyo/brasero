@@ -31,20 +31,14 @@ class TownForecastRepository @Inject constructor(
         val dailyForecast = getDailyForecastByTown(townId)
         val hourlyForecast = getHourlyForecastByTown(townId)
 
-        val forecast = Town(
-            id = townId,
-            townName = dailyForecast.name,
-            provinceName = dailyForecast.province,
-            isFavorite = true
-        )
         val dailyForecastEntities = mapDailyForecastToEntities(dailyForecast, townId)
         val hourlyForecastEntities = mapHourlyForecastToEntities(hourlyForecast, townId)
 
         with(braseroDatabase) {
             runInTransaction {
-                townDao().deleteTown(townId)
-                townDao().saveTown(forecast)
+                dayForecastDao().deleteDailyForecastByTownId(townId)
                 dayForecastDao().saveDailyForecast(dailyForecastEntities)
+                hourForecastDao().deleteHourlyForecastByTownId(townId)
                 hourForecastDao().saveHourlyForecast(hourlyForecastEntities)
             }
         }
