@@ -4,8 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material.Scaffold
 import androidx.compose.ui.Modifier
 import com.cassnyo.brasero.ui.navigation.BraseroNavigation
 import com.cassnyo.brasero.ui.theme.BraseroTheme
@@ -17,8 +16,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             BraseroTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
+                // NavigationCompose does not show startDestination on Xiaomi Device unless you use a Scaffold
+                // https://issuetracker.google.com/issues/227926002
+                Scaffold(modifier = Modifier.fillMaxSize()) {
                     BraseroNavigation()
                 }
             }
