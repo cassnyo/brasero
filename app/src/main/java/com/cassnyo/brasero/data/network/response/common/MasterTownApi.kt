@@ -21,7 +21,7 @@ data class MasterTownApi(
 ) {
     fun toTown(): Town {
         return Town(
-            id = this.id,
+            id = this.id.removePrefix("id"),
             townName = this.name,
             provinceName = this.capital,
             isFavorite = false
