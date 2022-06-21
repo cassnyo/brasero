@@ -1,8 +1,8 @@
 package com.cassnyo.brasero.ui.screen.home
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,7 +18,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AddLocationAlt
-import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.cassnyo.brasero.data.database.entity.Town
 import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
 import com.cassnyo.brasero.ui.theme.ColorPrimary
 import com.cassnyo.brasero.ui.theme.ColorPrimaryVariant
@@ -53,13 +53,11 @@ fun HomeScreen(navController: NavController) {
     ) {
         val pagerState = rememberPagerState()
 
-        Header(
+        TopBar(
             pagerState = pagerState,
+            currentTown = state.favoriteTowns.getOrNull(pagerState.currentPage),
             onSearchClicked = {
                 navController.navigate(NavigationRoutes.SEARCH)
-            },
-            onDotsClicked = {
-                // TODO
             }
         )
 
@@ -82,37 +80,38 @@ fun HomeScreen(navController: NavController) {
 }
 
 @Composable
-private fun Header(
+private fun TopBar(
     pagerState: PagerState,
+    currentTown: Town?,
     onSearchClicked: () -> Unit,
-    onDotsClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(4.dp)
     ) {
-        IconButton(onClick = onSearchClicked) {
+        IconButton(
+            modifier = Modifier.align(Alignment.TopStart),
+            onClick = onSearchClicked
+        ) {
             Icon(
                 imageVector = Icons.Rounded.Search,
                 contentDescription = "Buscar municipio"
             )
         }
 
-        if (pagerState.pageCount > 0) {
+        if (currentTown != null) {
+            Text(
+                text = currentTown.townName,
+                style = MaterialTheme.typography.h6,
+                modifier = Modifier.align(Alignment.Center),
+            )
+
             HorizontalPagerIndicator(
                 pagerState = pagerState,
-                modifier = Modifier
-                    .align(Alignment.Bottom)
-                    .padding(bottom = 16.dp),
-                indicatorWidth = 4.dp
-            )
-        }
-
-        IconButton(onClick = onDotsClicked) {
-            Icon(
-                imageVector = Icons.Rounded.MoreVert,
-                contentDescription = "Menú extendido"
+                indicatorWidth = 4.dp,
+                modifier = Modifier.align(Alignment.BottomCenter)
             )
         }
     }
