@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -53,18 +55,22 @@ fun HomeScreen(navController: NavController) {
     ) {
         val pagerState = rememberPagerState()
 
-        TopBar(
-            pagerState = pagerState,
-            currentTown = state.favoriteTowns.getOrNull(pagerState.currentPage),
-            onSearchClicked = {
-                navController.navigate(NavigationRoutes.SEARCH)
-            }
-        )
-
         val favoriteTownsCount = state.favoriteTowns.size
         if (favoriteTownsCount == 0) {
-            AddYourFirstTown()
+            AddYourFirstTown(
+                onSearchClicked = {
+                    navController.navigate(NavigationRoutes.SEARCH)
+                }
+            )
         } else {
+            TopBar(
+                pagerState = pagerState,
+                currentTown = state.favoriteTowns[pagerState.currentPage],
+                onSearchClicked = {
+                    navController.navigate(NavigationRoutes.SEARCH)
+                }
+            )
+
             HorizontalPager(
                 count = favoriteTownsCount,
                 state = pagerState,
@@ -82,7 +88,7 @@ fun HomeScreen(navController: NavController) {
 @Composable
 private fun TopBar(
     pagerState: PagerState,
-    currentTown: Town?,
+    currentTown: Town,
     onSearchClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -101,24 +107,23 @@ private fun TopBar(
             )
         }
 
-        if (currentTown != null) {
-            Text(
-                text = currentTown.townName,
-                style = MaterialTheme.typography.h6,
-                modifier = Modifier.align(Alignment.Center),
-            )
+        Text(
+            text = currentTown.townName,
+            style = MaterialTheme.typography.h6,
+            modifier = Modifier.align(Alignment.Center),
+        )
 
-            HorizontalPagerIndicator(
-                pagerState = pagerState,
-                indicatorWidth = 4.dp,
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
-        }
+        HorizontalPagerIndicator(
+            pagerState = pagerState,
+            indicatorWidth = 4.dp,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 
 @Composable
 private fun AddYourFirstTown(
+    onSearchClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -142,8 +147,18 @@ private fun AddYourFirstTown(
             style = MaterialTheme.typography.h6,
             fontWeight = FontWeight.SemiBold
         )
-
         AddYourFirstTownMessage()
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedButton(
+            onClick = onSearchClicked
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Search,
+                contentDescription = "Buscar municipio"
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Buscar municipio")
+        }
     }
 }
 
@@ -151,16 +166,12 @@ private fun AddYourFirstTown(
 private fun AddYourFirstTownMessage(
     modifier: Modifier = Modifier
 ) {
-    val searchId = "search"
     val addId = "add"
     val text = buildAnnotatedString {
-        append("Aún no has añadido ningún municipio a favoritos. Pulsa en ")
-        appendInlineContent(searchId, "[icon]")
-        append(" y añádelo pulsando en ")
+        append("Aquí verás la previsión de tus municipios favoritos. Búscalo y añadelo pulsando en el botón ")
         appendInlineContent(addId, "[icon]")
     }
     val inlineContent = mapOf(
-        searchId to buildInlineIconText(Icons.Rounded.Search, "Buscar municipio"),
         addId to buildInlineIconText(Icons.Rounded.Add, "Añadir municipio")
     )
     Text(
@@ -168,7 +179,7 @@ private fun AddYourFirstTownMessage(
         inlineContent = inlineContent,
         modifier = Modifier.padding(horizontal = 24.dp),
         textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.subtitle1
+        style = MaterialTheme.typography.body2
     )
 }
 
