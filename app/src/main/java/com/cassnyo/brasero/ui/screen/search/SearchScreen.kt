@@ -23,10 +23,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.TaskAlt
@@ -51,9 +49,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cassnyo.brasero.R
 import com.cassnyo.brasero.data.database.entity.Town
+import com.cassnyo.brasero.ui.common.component.BraseroAppBar
 import com.cassnyo.brasero.ui.common.component.PrettyLoading
 import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
-import com.cassnyo.brasero.ui.theme.ColorBackground
 
 @Composable
 fun SearchScreen(navController: NavController) {
@@ -61,9 +59,13 @@ fun SearchScreen(navController: NavController) {
     val state by viewModel.state.collectAsState(initial = SearchViewModel.UiState())
 
     Column(modifier = Modifier.fillMaxSize()) {
-        TopBar(
+        BraseroAppBar(
+            title = { Text(text = "Buscar municipio") },
+            onBackClicked = { navController.navigateUp() }
+        )
+
+        SearchField(
             query = state.query,
-            onBackClicked = { navController.navigateUp() },
             onQueryChanged = viewModel::onQueryChanged,
             onClearQueryClicked = viewModel::onClearQueryClicked
         )
@@ -88,50 +90,6 @@ fun SearchScreen(navController: NavController) {
 }
 
 @Composable
-private fun TopBar(
-    query: String,
-    onBackClicked: () -> Unit,
-    onQueryChanged: (String) -> Unit,
-    onClearQueryClicked: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        TopAppBar(
-            modifier = modifier.fillMaxWidth(),
-            title = {
-                Text(text = "Buscar municipio")
-            },
-            navigationIcon = {
-                IconButton(onClick = onBackClicked) {
-                    Icon(
-                        imageVector = Icons.Rounded.ArrowBack,
-                        contentDescription = "Volver atrás"
-                    )
-                }
-            },
-            elevation = 0.dp,
-            backgroundColor = ColorBackground
-        )
-
-        SearchField(
-            query = query,
-            onQueryChanged = onQueryChanged,
-            onClearQueryClicked = onClearQueryClicked,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = 8.dp,
-                    top = 4.dp,
-                    end = 8.dp,
-                    bottom = 0.dp
-                )
-        )
-    }
-}
-
-@Composable
 private fun SearchField(
     query: String,
     onQueryChanged: (String) -> Unit,
@@ -142,7 +100,15 @@ private fun SearchField(
     TextField(
         value = query,
         onValueChange = onQueryChanged,
-        modifier = modifier.focusRequester(focusRequester),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                start = 8.dp,
+                top = 4.dp,
+                end = 8.dp,
+                bottom = 0.dp
+            )
+            .focusRequester(focusRequester),
         placeholder = {
             Text(text = "Introduzca el nombre del municipio")
         },

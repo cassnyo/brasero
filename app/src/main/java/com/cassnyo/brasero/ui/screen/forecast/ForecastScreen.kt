@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -47,6 +46,7 @@ import com.cassnyo.brasero.data.database.entity.DayForecast
 import com.cassnyo.brasero.data.database.entity.HourForecast
 import com.cassnyo.brasero.data.database.entity.Town
 import com.cassnyo.brasero.data.database.join.TownForecast
+import com.cassnyo.brasero.ui.common.component.BraseroAppBar
 import com.cassnyo.brasero.ui.theme.ColorOnPrimary
 import com.cassnyo.brasero.ui.theme.ColorOnSurface
 import com.cassnyo.brasero.ui.theme.ColorPrimary
@@ -61,7 +61,15 @@ fun ForecastScreen(navController: NavController) {
     val forecast = viewModel.townForecast.collectAsState(initial = null).value
 
     if (forecast != null) {
-        TownForecast(forecast)
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            BraseroAppBar(
+                title = { Text(text = forecast.town.townName) },
+                onBackClicked = { navController.navigateUp() }
+            )
+            TownForecast(forecast)
+        }
     }
 }
 
@@ -105,12 +113,6 @@ private fun Header(
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "${town.townName}, ${town.provinceName}",
-            style = MaterialTheme.typography.h5,
-            fontWeight = FontWeight.Bold
-        )
-
         Spacer(modifier = Modifier.height(4.dp))
 
         SkyStatusImage(
