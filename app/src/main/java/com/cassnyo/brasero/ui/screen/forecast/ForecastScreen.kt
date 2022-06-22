@@ -95,7 +95,7 @@ fun TownForecast(
 }
 
 @Composable
-fun Header(
+private fun Header(
     modifier: Modifier = Modifier,
     town: Town,
     selectedHourForecast: HourForecast
@@ -130,7 +130,7 @@ fun Header(
 }
 
 @Composable
-fun TodayForecast(
+private fun TodayForecast(
     hourForecastList: List<HourForecast>,
     selectedHourForecast: HourForecast,
     onHourForecastClicked: (HourForecast) -> Unit,
@@ -168,7 +168,7 @@ fun TodayForecast(
 }
 
 @Composable
-fun HourForecastItem(
+private fun HourForecastItem(
     hourForecast: HourForecast,
     selectedHourForecast: HourForecast,
     onHourForecastClicked: (HourForecast) -> Unit,
@@ -209,7 +209,7 @@ fun HourForecastItem(
 }
 
 @Composable
-fun WeekForecast(
+private fun WeekForecast(
     modifier: Modifier = Modifier,
     dayForecastList: List<DayForecast>
 ) {
@@ -228,7 +228,7 @@ fun WeekForecast(
 }
 
 @Composable
-fun DayForecastItem(
+private fun DayForecastItem(
     modifier: Modifier = Modifier,
     dayForecast: DayForecast
 ) {

@@ -88,7 +88,7 @@ fun SearchScreen(navController: NavController) {
 }
 
 @Composable
-fun TopBar(
+private fun TopBar(
     query: String,
     onBackClicked: () -> Unit,
     onQueryChanged: (String) -> Unit,
@@ -132,7 +132,7 @@ fun TopBar(
 }
 
 @Composable
-fun SearchField(
+private fun SearchField(
     query: String,
     onQueryChanged: (String) -> Unit,
     onClearQueryClicked: () -> Unit,
@@ -181,7 +181,7 @@ fun SearchField(
 }
 
 @Composable
-fun NoResultsFound(
+private fun NoResultsFound(
     query: String,
     modifier: Modifier = Modifier
 ) {
@@ -208,7 +208,7 @@ fun NoResultsFound(
 }
 
 @Composable
-fun TownsList(
+private fun TownsList(
     towns: List<Town>,
     onTownClicked: (Town) -> Unit,
     onAddTownClicked: (Town) -> Unit,
@@ -253,7 +253,7 @@ fun TownsList(
 }
 
 @Composable
-fun RefreshTownsLoading(
+private fun RefreshTownsLoading(
     modifier: Modifier = Modifier
 ) {
     PrettyLoading(
