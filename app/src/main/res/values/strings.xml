@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">Brasero</string>
 
-    <string name="forecast_next_24_hours_title">Next 24 hours</string>
     <string name="forecast_temperature_celsius">%dº</string>
-    <string name="forecast_7_days_title">Next 7 days</string>
+    <string name="forecast_next_hours_title">Next hours</string>
+    <string name="forecast_next_days_title">Next days</string>
+    <string name="forecast_next_days_today">Today</string>
+    <string name="forecast_next_days_tomorrow">Tomorrow</string>
 </resources>

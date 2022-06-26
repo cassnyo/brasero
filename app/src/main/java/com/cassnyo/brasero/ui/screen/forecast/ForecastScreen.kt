@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -37,19 +36,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cassnyo.brasero.R
+import com.cassnyo.brasero.common.extension.isToday
+import com.cassnyo.brasero.common.extension.isTomorrow
 import com.cassnyo.brasero.data.database.entity.DayForecast
 import com.cassnyo.brasero.data.database.entity.HourForecast
+import com.cassnyo.brasero.data.database.entity.Humidity
+import com.cassnyo.brasero.data.database.entity.Temperature
 import com.cassnyo.brasero.data.database.entity.Town
+import com.cassnyo.brasero.data.database.entity.Wind
 import com.cassnyo.brasero.data.database.join.TownForecast
 import com.cassnyo.brasero.ui.common.component.BraseroAppBar
 import com.cassnyo.brasero.ui.theme.ColorOnPrimary
 import com.cassnyo.brasero.ui.theme.ColorOnSurface
 import com.cassnyo.brasero.ui.theme.ColorPrimary
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
@@ -94,9 +103,8 @@ fun TownForecast(
                selectedHourForecast = selectedHourForecast,
                onHourForecastClicked = { selectedHourForecast = it }
            )
-           WeekForecast(
-               modifier = Modifier.weight(1f, false),
-               dayForecastList = forecast.days
+           NextDaysForecast(
+               nextDaysForecast = forecast.days
            )
        }
    }
@@ -140,7 +148,7 @@ private fun TodayForecast(
 ) {
     Column(modifier = modifier) {
         Text(
-            text = stringResource(R.string.forecast_next_24_hours_title),
+            text = stringResource(R.string.forecast_next_hours_title),
             style = MaterialTheme.typography.h5,
             fontWeight = FontWeight.ExtraBold,
             modifier = Modifier.padding(
@@ -210,64 +218,91 @@ private fun HourForecastItem(
 }
 
 @Composable
-private fun WeekForecast(
-    modifier: Modifier = Modifier,
-    dayForecastList: List<DayForecast>
+private fun NextDaysForecast(
+    nextDaysForecast: List<DayForecast>,
+    modifier: Modifier = Modifier
 ) {
-    Text(
-        modifier = Modifier.padding(
-            horizontal = 16.dp,
-            vertical = 8.dp
-        ),
-        text = stringResource(R.string.forecast_7_days_title),
-        style = MaterialTheme.typography.h5,
-        fontWeight = FontWeight.ExtraBold
-    )
-    dayForecastList.forEach { dayForecast ->
-        DayForecastItem(dayForecast = dayForecast)
+    Column(
+        modifier = modifier.padding(16.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.forecast_next_days_title),
+            style = MaterialTheme.typography.h5,
+            fontWeight = FontWeight.ExtraBold
+        )
+        nextDaysForecast.forEach { nextDayForecast ->
+            NextDayForecast(
+                nextDayForecast = nextDayForecast,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
     }
 }
 
 @Composable
-private fun DayForecastItem(
-    modifier: Modifier = Modifier,
-    dayForecast: DayForecast
+private fun NextDayForecast(
+    nextDayForecast: DayForecast,
+    modifier: Modifier = Modifier
 ) {
-    Card(
-        modifier = modifier
-            .padding(
-                horizontal = 16.dp,
-                vertical = 8.dp
-            )
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly
+        // Date
+        Column(
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier.weight(1f)
         ) {
-            Text(text = dayForecast.date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()))
+            val date = nextDayForecast.date
+            val dayName = when {
+                date.isToday() -> stringResource(R.string.forecast_next_days_today)
+                date.isTomorrow() -> stringResource(R.string.forecast_next_days_tomorrow)
+                else -> date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
+            }
+            Text(
+                text = dayName,
+                style = MaterialTheme.typography.body1,
+                fontWeight = FontWeight.SemiBold
+            )
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                SkyStatusImage(
-                    modifier = Modifier.size(24.dp),
-                    skyStatus = dayForecast.skyStatus
-                )
-                Text(text = dayForecast.skyStatus)
+            Text(
+                text = date.format(DateTimeFormatter.ofPattern("MMM, dd")),
+                style = MaterialTheme.typography.caption
+            )
+        }
+
+        // Sky
+        SkyStatusImage(
+            modifier = Modifier
+                .weight(1f)
+                .size(42.dp),
+            skyStatus = nextDayForecast.skyStatus
+        )
+
+        // Temperature
+        val temperature = nextDayForecast.temperature
+        Row(
+            horizontalArrangement = Arrangement.End,
+            modifier = Modifier.weight(1f)
+        ) {
+            val temperatureString = buildAnnotatedString {
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.SemiBold
+                    )
+                ) {
+                    append(stringResource(R.string.forecast_temperature_celsius, temperature.minTemperature))
+                }
+                append(" / ")
+                withStyle(style = SpanStyle()) {
+                    append(stringResource(R.string.forecast_temperature_celsius, temperature.maxTemperature))
+                }
             }
 
-            Row {
-                val temperature = dayForecast.temperature
-                Text(
-                    text = stringResource(R.string.forecast_temperature_celsius, temperature.maxTemperature),
-                    style = MaterialTheme.typography.subtitle1
-                )
-                Text(
-                    text = stringResource(R.string.forecast_temperature_celsius, temperature.minTemperature),
-                    style = MaterialTheme.typography.subtitle2
-                )
-            }
+            Text(
+                text = temperatureString,
+                style = MaterialTheme.typography.body1
+            )
         }
     }
 }
@@ -304,4 +339,23 @@ private fun getSkyStatusIcon(context: Context, skyStatus: String): Int? {
     } catch (e: Resources.NotFoundException) {
         Log.w("Forecast", "Resource not found: $identifier")
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NextDaysForecastPreview() {
+    NextDaysForecast(
+        nextDaysForecast = listOf(
+            DayForecast(
+                id = null,
+                townId = "",
+                date = LocalDate.now(),
+                skyStatus = "13n",
+                chanceOfRain = 0,
+                temperature = Temperature(24, 30),
+                wind = Wind(10, "NE"),
+                humidity = Humidity(0, 80)
+            )
+        )
+    )
 }
