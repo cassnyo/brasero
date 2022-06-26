@@ -138,21 +138,20 @@ private fun TodayForecast(
     onHourForecastClicked: (HourForecast) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.padding(
-            horizontal = 16.dp,
-            vertical = 8.dp
-        )
-    ) {
+    Column(modifier = modifier) {
         Text(
             text = stringResource(R.string.forecast_next_24_hours_title),
             style = MaterialTheme.typography.h5,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.ExtraBold,
+            modifier = Modifier.padding(
+                horizontal = 16.dp,
+                vertical = 8.dp
+            )
         )
         LazyRow(
             contentPadding = PaddingValues(
                 vertical = 4.dp,
-                horizontal = 4.dp
+                horizontal = 16.dp
             )
         ) {
             items(
