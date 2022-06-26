@@ -38,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cassnyo.brasero.data.database.entity.Town
 import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
+import com.cassnyo.brasero.ui.screen.forecast.TownForecast
 import com.cassnyo.brasero.ui.theme.ColorPrimary
 import com.cassnyo.brasero.ui.theme.ColorPrimaryVariant
 import com.google.accompanist.pager.HorizontalPager
@@ -55,7 +56,7 @@ fun HomeScreen(navController: NavController) {
     ) {
         val pagerState = rememberPagerState()
 
-        val favoriteTownsCount = state.favoriteTowns.size
+        val favoriteTownsCount = state.forecast.size
         if (favoriteTownsCount == 0) {
             AddYourFirstTown(
                 onSearchClicked = {
@@ -65,7 +66,7 @@ fun HomeScreen(navController: NavController) {
         } else {
             TopBar(
                 pagerState = pagerState,
-                currentTown = state.favoriteTowns[pagerState.currentPage],
+                currentTown = state.forecast[pagerState.currentPage].town,
                 onSearchClicked = {
                     navController.navigate(NavigationRoutes.SEARCH)
                 }
@@ -78,8 +79,7 @@ fun HomeScreen(navController: NavController) {
                     .weight(1f)
                     .fillMaxWidth()
             ) { page ->
-                // FIXME Refactor TownForecast to receive a favorite town's id instead of the forecast
-                // TownForecast(forecast = state.favoriteTowns[page])
+                TownForecast(forecast = state.forecast[page])
             }
         }
     }
@@ -177,7 +177,7 @@ private fun AddYourFirstTownMessage(
     Text(
         text = text,
         inlineContent = inlineContent,
-        modifier = Modifier.padding(horizontal = 24.dp),
+        modifier = modifier.padding(horizontal = 24.dp),
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.body2
     )
