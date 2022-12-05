@@ -39,8 +39,6 @@ import androidx.navigation.NavController
 import com.cassnyo.brasero.data.database.entity.Town
 import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
 import com.cassnyo.brasero.ui.screen.forecast.TownForecast
-import com.cassnyo.brasero.ui.theme.ColorPrimary
-import com.cassnyo.brasero.ui.theme.ColorPrimaryVariant
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.PagerState
@@ -135,7 +133,7 @@ private fun AddYourFirstTown(
             imageVector = Icons.Rounded.AddLocationAlt,
             contentDescription = "Añade tu primer municipio",
             modifier = Modifier.size(120.dp),
-            tint = ColorPrimary
+            tint = MaterialTheme.colors.primary
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -197,7 +195,7 @@ private fun buildInlineIconText(
         Icon(
             imageVector = imageVector,
             contentDescription = contentDescription,
-            tint = ColorPrimaryVariant
+            tint = MaterialTheme.colors.primaryVariant
         )
     }
 }

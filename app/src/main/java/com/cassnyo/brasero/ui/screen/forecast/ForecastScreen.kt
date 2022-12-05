@@ -2,7 +2,6 @@ package com.cassnyo.brasero.ui.screen.forecast
 
 import android.content.Context
 import android.content.res.Resources
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,14 +50,13 @@ import com.cassnyo.brasero.data.database.entity.DayForecast
 import com.cassnyo.brasero.data.database.entity.HourForecast
 import com.cassnyo.brasero.data.database.entity.Humidity
 import com.cassnyo.brasero.data.database.entity.Temperature
-import com.cassnyo.brasero.data.database.entity.Town
 import com.cassnyo.brasero.data.database.entity.Wind
 import com.cassnyo.brasero.data.database.join.TownForecast
 import com.cassnyo.brasero.ui.common.component.BraseroAppBar
-import com.cassnyo.brasero.ui.theme.ColorOnPrimary
-import com.cassnyo.brasero.ui.theme.ColorOnSurface
-import com.cassnyo.brasero.ui.theme.ColorPrimary
+import com.cassnyo.brasero.ui.theme.BraseroTheme
+import timber.log.Timber
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
@@ -95,10 +93,10 @@ fun TownForecast(
            .verticalScroll(state = scrollState)
        ) {
            Header(
-               town = forecast.town,
                selectedHourForecast = selectedHourForecast
            )
-           TodayForecast(
+           Spacer(modifier = Modifier.height(16.dp))
+           NextHoursForecast(
                hourForecastList = forecast.hours,
                selectedHourForecast = selectedHourForecast,
                onHourForecastClicked = { selectedHourForecast = it }
@@ -112,35 +110,74 @@ fun TownForecast(
 
 @Composable
 private fun Header(
-    modifier: Modifier = Modifier,
-    town: Town,
-    selectedHourForecast: HourForecast
+    selectedHourForecast: HourForecast,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(4.dp))
+        HeaderTop(selectedHourForecast = selectedHourForecast)
+        Spacer(modifier = Modifier.height(16.dp))
+        HeaderBottom(selectedHourForecast = selectedHourForecast)
+    }
+}
 
-        SkyStatusImage(
-            modifier = Modifier.size(96.dp),
-            skyStatus = selectedHourForecast.skyStatus
+@Composable
+private fun HeaderBottom(
+    selectedHourForecast: HourForecast,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        // Wind
+        ColumnDetail(
+            title = stringResource(R.string.forecast_wind),
+            value = stringResource(R.string.forecast_wind_value, selectedHourForecast.wind.windSpeed)
         )
-        Text(text = selectedHourForecast.skyStatus)
 
-        Spacer(modifier = Modifier.height(4.dp))
+        // Humidity
+        ColumnDetail(
+            title = stringResource(R.string.forecast_humidity),
+            value = stringResource(R.string.forecast_humidity_value, selectedHourForecast.humidity)
+        )
 
-        Text(
-            text = stringResource(R.string.forecast_temperature_celsius, selectedHourForecast.temperature),
-            style = MaterialTheme.typography.h6,
-            fontWeight = FontWeight.SemiBold
+        // Rain // chance of rain
+        ColumnDetail(
+            title = stringResource(R.string.forecast_rain),
+            value = stringResource(R.string.forecast_rain_value, selectedHourForecast.chanceOfRain)
         )
     }
 }
 
 @Composable
-private fun TodayForecast(
+private fun HeaderTop(
+    selectedHourForecast: HourForecast,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.padding(vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val skyStatus = selectedHourForecast.skyStatus
+        SkyStatusImage(
+            skyStatus = skyStatus,
+            modifier = Modifier.size(96.dp)
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.forecast_temperature_celsius, selectedHourForecast.temperature),
+            style = MaterialTheme.typography.h2,
+            fontWeight = FontWeight.SemiBold
+        )
+        SkyStatusDescription(skyStatus = skyStatus)
+    }
+}
+
+@Composable
+private fun NextHoursForecast(
     hourForecastList: List<HourForecast>,
     selectedHourForecast: HourForecast,
     onHourForecastClicked: (HourForecast) -> Unit,
@@ -184,8 +221,8 @@ private fun HourForecastItem(
     modifier: Modifier = Modifier
 ) {
     val (backgroundColor, textColor) = when (hourForecast) {
-        selectedHourForecast -> Pair(ColorPrimary.copy(alpha = 0.4f), ColorOnPrimary)
-        else -> Pair(Color.Transparent, ColorOnSurface)
+        selectedHourForecast -> Pair(MaterialTheme.colors.primary.copy(alpha = 0.4f), MaterialTheme.colors.onPrimary)
+        else -> Pair(Color.Transparent, MaterialTheme.colors.onSurface)
     }
     Column(
         modifier = modifier
@@ -203,8 +240,8 @@ private fun HourForecastItem(
 
         Spacer(modifier = Modifier.height(4.dp))
         SkyStatusImage(
-            modifier = Modifier.size(48.dp),
-            skyStatus = hourForecast.skyStatus
+            skyStatus = hourForecast.skyStatus,
+            modifier = Modifier.size(48.dp)
         )
         Spacer(modifier = Modifier.height(4.dp))
 
@@ -273,10 +310,8 @@ private fun NextDayForecast(
 
         // Sky
         SkyStatusImage(
-            modifier = Modifier
-                .weight(1f)
-                .size(42.dp),
-            skyStatus = nextDayForecast.skyStatus
+            skyStatus = nextDayForecast.skyStatus,
+            modifier = Modifier.size(42.dp)
         )
 
         // Temperature
@@ -309,8 +344,8 @@ private fun NextDayForecast(
 
 @Composable
 private fun SkyStatusImage(
-    modifier: Modifier = Modifier,
-    skyStatus: String
+    skyStatus: String,
+    modifier: Modifier = Modifier
 ) {
     val skyIcon = getSkyStatusIcon(LocalContext.current, skyStatus)
     if (skyIcon != null) {
@@ -318,6 +353,39 @@ private fun SkyStatusImage(
             painter = painterResource(id = skyIcon),
             contentDescription = skyStatus,
             modifier = modifier,
+        )
+    }
+}
+
+@Composable
+private fun SkyStatusDescription(
+    skyStatus: String,
+    modifier: Modifier = Modifier
+) {
+    val skyDescription = getSkyStatusDescription(LocalContext.current, skyStatus)
+    Text(
+        text = stringResource(id = skyDescription),
+        style = MaterialTheme.typography.h5,
+        fontWeight = FontWeight.SemiBold
+    )
+}
+
+@Composable
+private fun ColumnDetail(
+    title: String,
+    value: String
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.caption
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.body2,
+            fontWeight = FontWeight.ExtraBold
         )
     }
 }
@@ -337,25 +405,59 @@ private fun getSkyStatusIcon(context: Context, skyStatus: String): Int? {
     return try {
         context.resources.getIdentifier(identifier, "drawable", context.packageName)
     } catch (e: Resources.NotFoundException) {
-        Log.w("Forecast", "Resource not found: $identifier")
+        Timber.w("Sky icon not found: $identifier")
+        null
+    }
+}
+
+private fun getSkyStatusDescription(context: Context, skyStatus: String): Int {
+    if (skyStatus.isEmpty()) return R.string.sky_not_found
+    val identifier = "sky_${skyStatus.removeSuffix("n")}"
+    return try {
+        context.resources.getIdentifier(identifier, "string", context.packageName)
+    } catch (e: Resources.NotFoundException) {
+        Timber.w("Sky description not found: $identifier")
+        R.string.sky_not_found
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun HeaderPreview() {
+    BraseroTheme {
+        Header(
+            selectedHourForecast = HourForecast(
+                id = null,
+                townId = "",
+                date = LocalDateTime.now(),
+                skyStatus = "13n",
+                chanceOfRain = 15,
+                rain = 14,
+                temperature = 24,
+                wind = Wind(10, "NE"),
+                humidity = 30
+            )
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun NextDaysForecastPreview() {
-    NextDaysForecast(
-        nextDaysForecast = listOf(
-            DayForecast(
-                id = null,
-                townId = "",
-                date = LocalDate.now(),
-                skyStatus = "13n",
-                chanceOfRain = 0,
-                temperature = Temperature(24, 30),
-                wind = Wind(10, "NE"),
-                humidity = Humidity(0, 80)
+    BraseroTheme {
+        NextDaysForecast(
+            nextDaysForecast = listOf(
+                DayForecast(
+                    id = null,
+                    townId = "",
+                    date = LocalDate.now(),
+                    skyStatus = "13n",
+                    chanceOfRain = 0,
+                    temperature = Temperature(24, 30),
+                    wind = Wind(10, "NE"),
+                    humidity = Humidity(0, 80)
+                )
             )
         )
-    )
+    }
 }

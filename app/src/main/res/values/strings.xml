@@ -2,8 +2,57 @@
     <string name="app_name">Brasero</string>
 
     <string name="forecast_temperature_celsius">%dº</string>
-    <string name="forecast_next_hours_title">Next hours</string>
-    <string name="forecast_next_days_title">Next days</string>
+    <string name="forecast_next_hours_title">Próximas horas</string>
+    <string name="forecast_next_days_title">Próximos días</string>
     <string name="forecast_next_days_today">Today</string>
     <string name="forecast_next_days_tomorrow">Tomorrow</string>
+    <string name="forecast_wind">Viento</string>
+    <string name="forecast_wind_value">%d km/h</string>
+    <string name="forecast_humidity">Humedad</string>
+    <string name="forecast_humidity_value">%d%%</string>
+    <string name="forecast_rain">Lluvia</string>
+    <string name="forecast_rain_value">%d%%</string>
+
+    <!-- Sky status descriptions -->
+    <string name="sky_not_found">Descripción no encontrada</string>
+    <!-- completed -->
+    <string name="sky_11">Despejado</string>
+    <string name="sky_12">Poco nuboso</string>
+    <string name="sky_13">Intervalos nubosos</string>
+    <string name="sky_14">Nuboso</string>
+    <string name="sky_15">Muy nuboso</string>
+    <string name="sky_16">Cubierto</string>
+    <string name="sky_17">Nubes altas</string>
+
+    <string name="sky_23">Intervalos nubosos con lluvia</string>
+    <string name="sky_24">Nuboso con lluvia</string>
+    <string name="sky_25">Muy nuboso con lluvia</string>
+    <string name="sky_26">Cubierto con lluvia</string>
+
+    <string name="sky_43">Intervalos nubosos con lluvia escasa</string>
+    <string name="sky_44">Nuboso con lluvia escasa</string>
+    <string name="sky_45">Muy nuboso con lluvia escasa</string>
+    <string name="sky_46">Cubierto con lluvia escasa</string>
+
+    <string name="sky_51">Intervalos nubosos con tormenta</string>
+    <string name="sky_52">Nuboso con tormenta</string>
+    <string name="sky_53">Muy nuboso con tormenta</string>
+    <string name="sky_54">Cubierto con tormenta</string>
+
+    <!-- tormenta con una gota -->
+    <string name="sky_61">Intervalos nubosos con tormenta y lluvia escasa</string>
+    <string name="sky_62">Nuboso con tormenta y lluvia escasa</string>
+    <string name="sky_63">Muy nuboso con tormenta y lluvia escasa</string>
+    <string name="sky_64">Cubierto con tormenta y lluvia escasa</string>
+
+    <!-- nieve -->
+    <string name="sky_71">--Not defined--</string>
+    <string name="sky_72">--Not defined--</string>
+    <string name="sky_73">--Not defined--</string>
+    <string name="sky_74">--Not defined--</string>
+
+    <!-- niebla -->
+    <string name="sky_81">Niebla</string>
+    <string name="sky_82">Bruma</string>
+    <string name="sky_83">--Not defined--</string>
 </resources>

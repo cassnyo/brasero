@@ -3,13 +3,13 @@ package com.cassnyo.brasero.ui.common.component
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.cassnyo.brasero.ui.theme.ColorBackground
 
 @Composable
 fun BraseroAppBar(
@@ -29,6 +29,6 @@ fun BraseroAppBar(
             }
         },
         elevation = 0.dp,
-        backgroundColor = ColorBackground
+        backgroundColor = MaterialTheme.colors.background
     )
 }
