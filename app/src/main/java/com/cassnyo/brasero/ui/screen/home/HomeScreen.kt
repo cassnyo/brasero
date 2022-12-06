@@ -23,7 +23,9 @@ import androidx.compose.material.icons.rounded.AddLocationAlt
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -37,8 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.cassnyo.brasero.data.database.entity.Town
+import com.cassnyo.brasero.ui.common.component.PrettyLoading
 import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
-import com.cassnyo.brasero.ui.screen.forecast.TownForecast
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.HorizontalPagerIndicator
 import com.google.accompanist.pager.PagerState
@@ -46,39 +48,50 @@ import com.google.accompanist.pager.rememberPagerState
 
 @Composable
 fun HomeScreen(navController: NavController) {
-    val viewModel : HomeViewModel = hiltViewModel()
-    val state by viewModel.state.collectAsState(initial = HomeViewModel.UiState())
+    val viewModel: HomeViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsState()
 
-    Column(
+    Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        val pagerState = rememberPagerState()
-
-        val favoriteTownsCount = state.forecast.size
-        if (favoriteTownsCount == 0) {
-            AddYourFirstTown(
-                onSearchClicked = {
-                    navController.navigate(NavigationRoutes.SEARCH)
-                }
-            )
-        } else {
-            TopBar(
-                pagerState = pagerState,
-                currentTown = state.forecast[pagerState.currentPage].town,
-                onSearchClicked = {
-                    navController.navigate(NavigationRoutes.SEARCH)
-                }
-            )
-
-            HorizontalPager(
-                count = favoriteTownsCount,
-                state = pagerState,
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) { page ->
-                TownForecast(forecast = state.forecast[page])
+        when {
+            state.isLoading -> PrettyLoading(size = 80.dp, modifier = Modifier.align(Alignment.Center))
+            state.favoriteTowns.isEmpty() ->
+                AddYourFirstTown(onSearchClicked = { navController.navigate(NavigationRoutes.SEARCH) })
+            else -> {
+                HomeContent(
+                    favoriteTowns = state.favoriteTowns,
+                    onSearchClicked = { navController.navigate(NavigationRoutes.SEARCH) }
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun HomeContent(
+    favoriteTowns: List<Town>,
+    onSearchClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val pagerState = rememberPagerState()
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
+        TopBar(
+            pagerState = pagerState,
+            townName = favoriteTowns[pagerState.currentPage].townName,
+            onSearchClicked = { onSearchClicked() }
+        )
+
+        HorizontalPager(
+            count = favoriteTowns.size,
+            state = pagerState,
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        ) { page ->
+            // TODO Show town's forecast
         }
     }
 }
@@ -86,7 +99,7 @@ fun HomeScreen(navController: NavController) {
 @Composable
 private fun TopBar(
     pagerState: PagerState,
-    currentTown: Town,
+    townName: String,
     onSearchClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -106,16 +119,18 @@ private fun TopBar(
         }
 
         Text(
-            text = currentTown.townName,
+            text = townName,
             style = MaterialTheme.typography.h6,
             modifier = Modifier.align(Alignment.Center),
         )
 
-        HorizontalPagerIndicator(
-            pagerState = pagerState,
-            indicatorWidth = 4.dp,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+        if (pagerState.pageCount > 1) {
+            HorizontalPagerIndicator(
+                pagerState = pagerState,
+                indicatorWidth = 4.dp,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
+        }
     }
 }
 
