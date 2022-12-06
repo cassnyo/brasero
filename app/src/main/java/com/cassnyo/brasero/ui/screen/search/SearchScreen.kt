@@ -31,13 +31,12 @@ import androidx.compose.material.icons.rounded.TaskAlt
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -58,7 +57,7 @@ fun SearchScreen(navController: NavController) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         BraseroAppBar(
-            title = { Text(text = "Buscar municipio") },
+            title = { Text(stringResource(R.string.search_title)) },
             onBackClicked = { navController.navigateUp() }
         )
 
@@ -75,7 +74,7 @@ fun SearchScreen(navController: NavController) {
                 RefreshTownsLoading(modifier = Modifier.align(Alignment.Center))
             }
 
-            if (!state.isLoading && state.query.isNotEmpty() && state.towns.isEmpty()) {
+            if (state.noResultsFound()) {
                 NoResultsFound(query = state.query)
             }
 
@@ -97,7 +96,6 @@ private fun SearchField(
     onClearQueryClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val focusRequester = remember { FocusRequester() }
     TextField(
         value = query,
         onValueChange = onQueryChanged,
@@ -109,13 +107,11 @@ private fun SearchField(
                 end = 8.dp,
                 bottom = 0.dp
             ),
-        placeholder = {
-            Text(text = "Introduzca el nombre del municipio")
-        },
+        placeholder = { Text(stringResource(R.string.search_field_hint)) },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Rounded.Search,
-                contentDescription = "Buscar municipio"
+                contentDescription = stringResource(R.string.search_field_description)
             )
         },
         trailingIcon = {
@@ -123,7 +119,7 @@ private fun SearchField(
                 IconButton(onClick = onClearQueryClicked) {
                     Icon(
                         imageVector = Icons.Rounded.Cancel,
-                        contentDescription = "Limpiar búsqueda"
+                        contentDescription = stringResource(R.string.search_field_clear_description)
                     )
                 }
             }
@@ -155,11 +151,11 @@ private fun NoResultsFound(
     ) {
         Image(
             painter = painterResource(id = R.drawable.bg_not_found),
-            contentDescription = "Sin resultados",
+            contentDescription = stringResource(R.string.search_no_results_description),
             modifier = Modifier.width(240.dp)
         )
         Text(
-            text = "No hemos podido encontrar \"$query\"",
+            text = stringResource(R.string.search_no_results, query),
             modifier = Modifier.padding(24.dp),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.h6,
@@ -181,6 +177,7 @@ private fun TownsList(
     ) {
         items(
             items = towns,
+            key = { it.id }
         ) { town ->
             Row(
                 modifier = Modifier
@@ -198,13 +195,13 @@ private fun TownsList(
                             .size(48.dp)
                             .padding(12.dp), // Same size/padding as an IconButton
                         imageVector = Icons.Rounded.TaskAlt,
-                        contentDescription = "Municipio favorito"
+                        contentDescription = stringResource(R.string.search_favorite_town_description)
                     )
                 } else {
                     IconButton(onClick = { onAddTownClicked(town) }) {
                         Icon(
                             imageVector = Icons.Rounded.Add,
-                            contentDescription = "Añadir municipio"
+                            contentDescription = stringResource(R.string.search_add_town_to_favorites_description)
                         )
                     }
                 }
@@ -219,7 +216,7 @@ private fun RefreshTownsLoading(
 ) {
     PrettyLoading(
         modifier = modifier,
-        message = "Obteniendo ciudades disponibles",
+        message = stringResource(R.string.search_loading_towns_description),
         size = 80.dp
     )
 }

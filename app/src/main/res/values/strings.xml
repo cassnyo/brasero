@@ -13,6 +13,16 @@
     <string name="forecast_rain">Lluvia</string>
     <string name="forecast_rain_value">%d%%</string>
 
+    <string name="search_title">Buscar mucipio</string>
+    <string name="search_field_hint">Buscar</string>
+    <string name="search_field_description">Buscar municipio</string>
+    <string name="search_field_clear_description">Limpiar búsqueda</string>
+    <string name="search_loading_towns_description">Obteniendo municipios disponibles</string>
+    <string name="search_no_results_description">Búsqueda sin resultados</string>
+    <string name="search_no_results">No hemos podido encontrar el municipio \"%s\"</string>
+    <string name="search_favorite_town_description">Municipio en favoritos</string>
+    <string name="search_add_town_to_favorites_description">Añadir municipio a favoritos</string>
+
     <!-- Sky status descriptions -->
     <string name="sky_not_found">Descripción no encontrada</string>
     <!-- completed -->

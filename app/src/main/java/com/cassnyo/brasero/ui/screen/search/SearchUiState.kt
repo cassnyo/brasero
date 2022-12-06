@@ -7,4 +7,6 @@ data class SearchUiState(
     val isLoading: Boolean = false,
     val isRefreshingTowns: Boolean = false,
     val towns: List<Town> = emptyList()
-)
+) {
+    fun noResultsFound() = !isLoading && query.isNotEmpty() && towns.isEmpty()
+}
