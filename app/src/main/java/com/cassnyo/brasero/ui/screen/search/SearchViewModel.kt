@@ -7,11 +7,14 @@ import com.cassnyo.brasero.data.repository.TownRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,60 +24,51 @@ class SearchViewModel @Inject constructor(
     private val townRepository: TownRepository
 ) : ViewModel() {
 
-    data class UiState(
-        val query: String = "",
-        val isLoading: Boolean = false,
-        val isRefreshingTowns: Boolean = false,
-        val towns: List<Town> = emptyList()
-    )
-
-    private val currentQuery = MutableStateFlow("")
+    private val query = MutableStateFlow("")
     private val isLoading = MutableStateFlow(false)
     private val isRefreshingTowns = MutableStateFlow(false)
-    private val towns: Flow<List<Town>> = currentQuery
-        .onEach { query ->
-            if (query.isNotEmpty()) {
-                isLoading.value = true
-            }
-        }
+    private val towns: Flow<List<Town>> = query
+        .debounce(250)
+        .onEach { isLoading.value = true }
         .flatMapLatest { query ->
             when {
-                query.isEmpty() -> flowOf(emptyList())
-                else -> townRepository.getTowns(query)
+                query.isEmpty() -> emptyFlow()
+                else -> queryTowns(query)
             }
         }
-        .onEach {
-            isLoading.value = false
-        }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
+        .onEach { isLoading.value = false }
+        .stateIn(viewModelScope, WhileSubscribed(5000), emptyList())
 
-    val state: Flow<UiState> = combine(
-        currentQuery,
-        isLoading,
-        isRefreshingTowns,
-        towns
-    ) { currentQuery, isLoading, isRefreshingTowns, towns ->
-        UiState(currentQuery, isLoading, isRefreshingTowns, towns)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), UiState())
+    val uiState: Flow<SearchUiState> = combine(
+        query, isLoading, isRefreshingTowns, towns
+    ) { query, isLoading, isRefreshingTowns, towns ->
+        SearchUiState(query, isLoading, isRefreshingTowns, towns)
+    }.stateIn(viewModelScope, WhileSubscribed(5000), SearchUiState())
 
     init {
+        refreshTowns()
+    }
+
+    private fun refreshTowns() {
+        isRefreshingTowns.value = true
         viewModelScope.launch {
-            isRefreshingTowns.value = true
             townRepository.refreshTowns()
             isRefreshingTowns.value = false
         }
     }
 
+    private fun queryTowns(query: String): Flow<List<Town>> =
+        townRepository
+            .getTowns(query)
+            .distinctUntilChanged()
+            .onStart { isLoading.value = true }
+
     fun onQueryChanged(query: String) {
-        currentQuery.value = query
+        this.query.value = query
     }
 
     fun onClearQueryClicked() {
-        currentQuery.value = ""
-    }
-
-    fun onBackClicked() {
-        // TODO
+        this.query.value = ""
     }
 
     fun onAddTownClicked(town: Town) {
@@ -82,5 +76,4 @@ class SearchViewModel @Inject constructor(
             townRepository.updateTown(town.copy(isFavorite = true))
         }
     }
-
 }

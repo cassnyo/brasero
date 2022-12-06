@@ -29,7 +29,6 @@ import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.TaskAlt
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -37,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -56,7 +54,7 @@ import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
 @Composable
 fun SearchScreen(navController: NavController) {
     val viewModel: SearchViewModel = hiltViewModel()
-    val state by viewModel.state.collectAsState(initial = SearchViewModel.UiState())
+    val state by viewModel.uiState.collectAsState(initial = SearchUiState())
 
     Column(modifier = Modifier.fillMaxSize()) {
         BraseroAppBar(
@@ -73,9 +71,12 @@ fun SearchScreen(navController: NavController) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            when {
-                state.isRefreshingTowns -> RefreshTownsLoading(modifier = Modifier.align(Alignment.Center))
-                !state.isLoading && state.query.isNotEmpty() && state.towns.isEmpty() -> NoResultsFound(state.query)
+            if (state.isRefreshingTowns) {
+                RefreshTownsLoading(modifier = Modifier.align(Alignment.Center))
+            }
+
+            if (!state.isLoading && state.query.isNotEmpty() && state.towns.isEmpty()) {
+                NoResultsFound(query = state.query)
             }
 
             TownsList(
@@ -107,8 +108,7 @@ private fun SearchField(
                 top = 4.dp,
                 end = 8.dp,
                 bottom = 0.dp
-            )
-            .focusRequester(focusRequester),
+            ),
         placeholder = {
             Text(text = "Introduzca el nombre del municipio")
         },
@@ -139,11 +139,6 @@ private fun SearchField(
             unfocusedIndicatorColor = Color.Transparent
         )
     )
-    
-    LaunchedEffect(Unit) {
-        // Request focus to open the keyboard
-        focusRequester.requestFocus()
-    }
 }
 
 @Composable
