@@ -6,6 +6,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -84,40 +86,67 @@ fun ForecastScreen(navController: NavController) {
 fun TownForecast(
     forecast: TownForecast
 ) {
-   if (forecast.hours.isNotEmpty()) {
-       var selectedHourForecast by remember { mutableStateOf(forecast.hours.first()) }
-       val scrollState = rememberScrollState()
+    if (forecast.hours.isNotEmpty()) {
+        var selectedHourForecast by remember { mutableStateOf(forecast.hours.first()) }
+        val scrollState = rememberScrollState()
 
-       Column(modifier = Modifier
-           .fillMaxSize()
-           .verticalScroll(state = scrollState)
-       ) {
-           Header(
-               selectedHourForecast = selectedHourForecast
-           )
-           Spacer(modifier = Modifier.height(16.dp))
-           NextHoursForecast(
-               hourForecastList = forecast.hours,
-               selectedHourForecast = selectedHourForecast,
-               onHourForecastClicked = { selectedHourForecast = it }
-           )
-           NextDaysForecast(
-               nextDaysForecast = forecast.days
-           )
-       }
-   }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(state = scrollState)
+        ) {
+            Header(
+                townName = forecast.town.townName,
+                selectedHourForecast = selectedHourForecast,
+                modifier = Modifier.padding(horizontal = 48.dp)
+            )
+            Spacer(modifier = Modifier.height(48.dp))
+            NextHoursForecast(
+                hourForecastList = forecast.hours,
+                selectedHourForecast = selectedHourForecast,
+                onHourForecastClicked = { selectedHourForecast = it },
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+            NextDaysForecast(
+                nextDaysForecast = forecast.days,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
 }
 
 @Composable
 private fun Header(
+    townName: String,
     selectedHourForecast: HourForecast,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        HeaderTop(selectedHourForecast = selectedHourForecast)
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(R.string.forecast_temperature_celsius, selectedHourForecast.temperature),
+                style = MaterialTheme.typography.h2,
+                modifier = Modifier.align(Alignment.Bottom)
+            )
+
+            SkyStatusImage(
+                skyStatus = selectedHourForecast.skyStatus,
+                modifier = Modifier.size(96.dp)
+            )
+        }
+        Text(
+            text = townName,
+            style = MaterialTheme.typography.h5,
+            fontWeight = FontWeight.SemiBold
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
         HeaderBottom(selectedHourForecast = selectedHourForecast)
     }
@@ -183,19 +212,12 @@ private fun NextHoursForecast(
     onHourForecastClicked: (HourForecast) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
-        Text(
-            text = stringResource(R.string.forecast_next_hours_title),
-            style = MaterialTheme.typography.h5,
-            fontWeight = FontWeight.ExtraBold,
-            modifier = Modifier.padding(
-                horizontal = 16.dp,
-                vertical = 8.dp
-            )
-        )
+    Section(
+        modifier = modifier
+    ) {
         LazyRow(
             contentPadding = PaddingValues(
-                vertical = 4.dp,
+                vertical = 12.dp,
                 horizontal = 16.dp
             )
         ) {
@@ -234,7 +256,6 @@ private fun HourForecastItem(
     ) {
         Text(
             text = hourForecast.date.format(DateTimeFormatter.ofPattern("HH:mm")),
-            color = textColor,
             style = MaterialTheme.typography.subtitle1
         )
 
@@ -259,19 +280,20 @@ private fun NextDaysForecast(
     nextDaysForecast: List<DayForecast>,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.padding(16.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.forecast_next_days_title),
-            style = MaterialTheme.typography.h5,
-            fontWeight = FontWeight.ExtraBold
-        )
-        nextDaysForecast.forEach { nextDayForecast ->
-            NextDayForecast(
-                nextDayForecast = nextDayForecast,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+    Section(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .padding(
+                    horizontal = 32.dp,
+                    vertical = 16.dp
+                )
+        ) {
+            nextDaysForecast.forEach { nextDayForecast ->
+                NextDayForecast(
+                    nextDayForecast = nextDayForecast,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
         }
     }
 }
@@ -426,6 +448,7 @@ private fun getSkyStatusDescription(context: Context, skyStatus: String): Int {
 private fun HeaderPreview() {
     BraseroTheme {
         Header(
+            townName = "Madrid",
             selectedHourForecast = HourForecast(
                 id = null,
                 townId = "",
@@ -459,5 +482,57 @@ private fun NextDaysForecastPreview() {
                 )
             )
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NextHoursForecastPreview() {
+    BraseroTheme {
+        NextHoursForecast(
+            hourForecastList = List(20) {
+                HourForecast(
+                    id = it,
+                    townId = "",
+                    date = LocalDateTime.now(),
+                    skyStatus = "13",
+                    chanceOfRain = 20,
+                    rain = 20,
+                    temperature = 20,
+                    wind = Wind(20, "N"),
+                    humidity = 20
+                )
+            },
+            selectedHourForecast =
+            HourForecast(
+                id = 2,
+                townId = "",
+                date = LocalDateTime.now(),
+                skyStatus = "13",
+                chanceOfRain = 20,
+                rain = 20,
+                temperature = 20,
+                wind = Wind(20, "N"),
+                humidity = 20
+            ),
+            onHourForecastClicked = {}
+        )
+    }
+}
+
+@Composable
+private fun Section(
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(size = 16.dp))
+            .background(
+                MaterialTheme.colors.surface.copy(alpha = 0.2f)
+            )
+    ) {
+        content()
     }
 }

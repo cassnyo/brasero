@@ -49,6 +49,8 @@ import com.cassnyo.brasero.data.database.entity.Town
 import com.cassnyo.brasero.ui.common.component.BraseroAppBar
 import com.cassnyo.brasero.ui.common.component.PrettyLoading
 import com.cassnyo.brasero.ui.common.navigation.NavigationRoutes
+import com.cassnyo.brasero.ui.theme.ColorPrimary
+import com.cassnyo.brasero.ui.theme.ColorPrimaryVariant
 
 @Composable
 fun SearchScreen(navController: NavController) {
