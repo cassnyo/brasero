@@ -2,6 +2,7 @@ package com.cassnyo.brasero.data.database.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.LocalDateTime
 
 @Entity(tableName = "town")
 data class Town(
@@ -9,5 +10,6 @@ data class Town(
     val id: String,
     val townName: String,
     val provinceName: String,
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    val updatedAt: LocalDateTime?
 )

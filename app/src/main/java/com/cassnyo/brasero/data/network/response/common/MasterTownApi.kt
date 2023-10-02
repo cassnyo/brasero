@@ -24,7 +24,8 @@ data class MasterTownApi(
             id = this.id.removePrefix("id"),
             townName = this.name,
             provinceName = this.capital,
-            isFavorite = false
+            isFavorite = false,
+            updatedAt = null,
         )
     }
 }

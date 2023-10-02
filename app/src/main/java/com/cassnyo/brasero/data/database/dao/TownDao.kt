@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface TownDao {
 
+    @Query("SELECT * FROM town WHERE id = :townId")
+    fun getTown(townId: String): Town?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun saveTown(town: Town)
 
